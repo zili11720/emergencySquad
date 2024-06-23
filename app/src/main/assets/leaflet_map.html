@@ -15,7 +15,7 @@
 <script>
     var map;
 
-    function initMap(latitude, longitude) {
+    function initMap(latitude, longitude, locations) {
         map = L.map('map').setView([latitude, longitude], 19);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -24,7 +24,6 @@
         }).addTo(map);
 
         var customIcon = L.icon({
-            //iconUrl: 'https://leafletjs.com/examples/custom-icons/leaf-red.png',
             iconUrl: 'file:///android_asset/location-icon1.png',
             iconSize: [38, 40],
             iconAnchor: [22, 94],
@@ -34,13 +33,24 @@
         L.marker([latitude, longitude], { icon: customIcon }).addTo(map)
             .bindPopup("Me")
             .openPopup();
+
+        // Add multiple locations
+        locations.forEach(function(location) {
+            L.marker([location[0], location[1]], { icon: customIcon }).addTo(map)
+                .bindPopup("Location: " + location[0] + ", " + location[1]);
+        });
     }
 
-    function updateMapLocation(latitude, longitude) {
+    function updateMapLocation(latitude, longitude, locations) {
         if (map) {
             map.setView([latitude, longitude], 19);
+            // Update markers for multiple locations
+            locations.forEach(function(location) {
+                L.marker([location[0], location[1]], { icon: customIcon }).addTo(map)
+                    .bindPopup("Location: " + location[0] + ", " + location[1]);
+            });
         } else {
-            initMap(latitude, longitude);
+            initMap(latitude, longitude, locations);
         }
     }
 </script>
