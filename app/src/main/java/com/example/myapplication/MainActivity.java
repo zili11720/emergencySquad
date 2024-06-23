@@ -18,7 +18,6 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.myapplication.databinding.ActivityMainBinding;
-import com.google.android.material.snackbar.Snackbar;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -45,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view)
             {
-                Intent intent = new Intent(MainActivity.this, MessagesActivity.class);
+                Intent intent = new Intent(MainActivity.this, MessagesFragment.class);
                 startActivity(intent);
             }
         });
