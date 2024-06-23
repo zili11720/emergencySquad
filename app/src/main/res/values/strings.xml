@@ -20,6 +20,7 @@
     <string name="password_text">Password</string>
     <string name="username_text">Username</string>
     <string name="welcome">Welcome to your safe zone</string>
+    <string name="type_a_message">Type a message</string>
 
 
 </resources>

@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.Menu;
@@ -42,10 +43,10 @@ public class MainActivity extends AppCompatActivity {
 
         binding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAnchorView(R.id.fab)
-                        .setAction("Action", null).show();
+            public void onClick(View view)
+            {
+                Intent intent = new Intent(MainActivity.this, MessagesActivity.class);
+                startActivity(intent);
             }
         });
 
