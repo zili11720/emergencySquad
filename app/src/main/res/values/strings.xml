@@ -14,6 +14,7 @@
     <string name="username">username</string>
     <string name="password">password</string>
     <string name="sign_in">Sign in</string>
+    <string name="emergency_button">Emergency</string>
 
     #texts
     <string name="welcome_to_control_screen">Welcome to control screen</string>
@@ -22,6 +23,7 @@
     <string name="welcome">Welcome to your safe zone</string>
     <string name="type_a_message">Type a message</string>
     <string name="messages_updates_title">messages:</string>
+
 
 
 </resources>
