@@ -18,15 +18,15 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.example.myapplication.databinding.FragmentSecondBinding;
+import com.example.myapplication.databinding.FragmentMapBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-public class SecondFragment extends Fragment {
+public class MapFragment extends Fragment {
 
-    private FragmentSecondBinding binding;
-    private static final String TAG = "SecondFragment";
+    private FragmentMapBinding binding;
+    private static final String TAG = "MapFragment";
     private FusedLocationProviderClient fusedLocationClient;
     private WebView webView;
 
@@ -38,7 +38,7 @@ public class SecondFragment extends Fragment {
             @NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState
     ) {
-        binding = FragmentSecondBinding.inflate(inflater, container, false);
+        binding = FragmentMapBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -47,7 +47,7 @@ public class SecondFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         binding.buttonSecond.setOnClickListener(v ->
-                NavHostFragment.findNavController(SecondFragment.this)
+                NavHostFragment.findNavController(MapFragment.this)
                         .navigate(R.id.action_SecondFragment_to_FirstFragment)
         );
 

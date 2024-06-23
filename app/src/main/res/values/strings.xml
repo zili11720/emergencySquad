@@ -1,16 +1,25 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">Safe Zone</string>
     <string name="action_settings">Settings</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
+    <string name="first_fragment_label">welcome</string>
+    <string name="map_fragment_label">map</string>
+    <string name="control_fragment_label">control</string>
+
+    #bottons
     <string name="next">Next</string>
     <string name="previous">Previous</string>
-
-    <string name="Hi"> Hi</string>
-
     <string name="show_map">Show map</string>
+    <string name="manage_warriors">Manage Warriors</string>
+    <string name="username">username</string>
+    <string name="password">password</string>
+    <string name="sign_in">Sign in</string>
 
-    <string name="enter_as_manager">Enter as manager</string>
-    <string name="hello_world">Hello World</string>
+    #texts
+    <string name="welcome_to_control_screen">Welcome to control screen</string>
+    <string name="password_text">Password</string>
+    <string name="username_text">Username</string>
+    <string name="welcome">Welcome to your safe zone</string>
+
+
 </resources>

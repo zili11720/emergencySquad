@@ -96,8 +96,8 @@ public class MainActivity extends AppCompatActivity {
             NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_content_main);
             if (navHostFragment != null) {
                 navHostFragment.getChildFragmentManager().getFragments().forEach(fragment -> {
-                    if (fragment instanceof SecondFragment) {
-                        ((SecondFragment) fragment).onRequestPermissionsResult(requestCode, permissions, grantResults);
+                    if (fragment instanceof MapFragment) {
+                        ((MapFragment) fragment).onRequestPermissionsResult(requestCode, permissions, grantResults);
                     }
                 });
             }

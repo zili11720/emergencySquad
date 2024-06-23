@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#CABA9C"
     tools:context=".FirstFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -12,43 +13,58 @@
         android:layout_height="match_parent"
         android:padding="16dp">
 
-        <!-- Guideline to center the buttons -->
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline_vertical_center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.5" />
-
-        <Button
-            android:id="@+id/button_first"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/Blue"
-            android:text="@string/show_map"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/guideline_vertical_center" />
-
-        <Button
-            android:id="@+id/button_manager"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/Blue"
-            android:text="@string/enter_as_manager"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/button_first" />
-
         <TextView
-            android:id="@+id/textview_first"
+            android:id="@+id/login_title"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/welcome"
+            android:textSize="24sp"
+            android:textColor="@color/hunter_green"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/edittext_username"
+            app:layout_constraintVertical_bias="0.4" />
+
+        <EditText
+            android:id="@+id/edittext_username"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/hello_world"
-            android:textColor="@color/Blue"
+            android:hint="@string/username_text"
+            android:backgroundTint="#4C6444"
+            android:textColor="#102820"
+            android:padding="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/button_manager" />
+            app:layout_constraintTop_toBottomOf="@id/login_title"
+            app:layout_constraintWidth_percent="0.6" /> <!-- Shorter width -->
+
+        <EditText
+            android:id="@+id/edittext_password"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="@string/password_text"
+            android:inputType="textPassword"
+            android:backgroundTint="#4C6444"
+            android:textColor="#102820"
+            android:padding="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/edittext_username"
+            app:layout_constraintWidth_percent="0.6" /> <!-- Shorter width -->
+
+        <Button
+            android:id="@+id/button_sign_in"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:backgroundTint="#102820"
+            android:text="@string/sign_in"
+            android:textColor="@android:color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/edittext_password" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

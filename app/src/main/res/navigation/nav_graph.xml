@@ -13,16 +13,28 @@
 
         <action
             android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment" />
+            app:destination="@id/MapFragment" />
+        <action
+            android:id="@+id/action_FirstFragment_to_ControlFragment"
+            app:destination="@id/ControlFragment" />
     </fragment>
     <fragment
-        android:id="@+id/SecondFragment"
-        android:name="com.example.myapplication.SecondFragment"
-        android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_second" >
+        android:id="@+id/MapFragment"
+        android:name="com.example.myapplication.MapFragment"
+        android:label="@string/map_fragment_label"
+        tools:layout="@layout/fragment_map" >
 
         <action
             android:id="@+id/action_SecondFragment_to_FirstFragment"
             app:destination="@id/FirstFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/ControlFragment"
+        android:name="com.example.myapplication.ControlFragment"
+        android:label="@string/control_fragment_label"
+        tools:layout="@layout/fragment_control" >
+        <action
+            android:id="@+id/action_ControlFragment_to_MapFragment"
+            app:destination="@id/MapFragment" />
     </fragment>
 </navigation>
