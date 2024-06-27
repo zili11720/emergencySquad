@@ -17,6 +17,16 @@
         <action
             android:id="@+id/action_FirstFragment_to_ControlFragment"
             app:destination="@id/ControlFragment" />
+        <action
+            android:id="@+id/action_FirstFragment_to_NewTeamFragment"
+            app:destination="@id/NewTeamFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/TeamFragment"
+        android:name="com.example.myapplication.TeamFragment"
+        android:label="Team Members"
+        tools:layout="@layout/fragment_team" >
+
     </fragment>
     <fragment
         android:id="@+id/MapFragment"
@@ -40,4 +50,12 @@
             android:id="@+id/action_ControlFragment_to_TeamFragment"
             app:destination="@id/TeamFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/NewTeamFragment"
+        android:name="com.example.myapplication.NewTeamFragment"
+        android:label="New Team"
+        tools:layout="@layout/fragment_new_team" >
+    </fragment>
+
+
 </navigation>

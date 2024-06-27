@@ -35,7 +35,7 @@ public class ControlFragment extends Fragment {
             }
         });
 
-        binding.btn_manage_warriors.setOnClickListener(new View.OnClickListener() {
+        binding.btnManageWarriors.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 NavHostFragment.findNavController(ControlFragment.this)

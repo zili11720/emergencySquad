@@ -25,6 +25,10 @@
     <string name="messages_updates_title">messages:</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="create_new_team">To create your safe zone, please fill the following details:</string>
+    <string name="enter_manager_details">Enter Manager Details</string>
+    <string name="create">Create</string>
+    <string name="create_a_new_team">create a new team</string>
 
 
 </resources>
