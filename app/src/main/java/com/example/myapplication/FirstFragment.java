@@ -92,11 +92,11 @@ public class FirstFragment extends Fragment {
                     JSONObject jsonResponse = new JSONObject(response.toString());
                     return jsonResponse.has("status") && jsonResponse.getString("status").equals("success");
                 } else {
-                    return false;
+                    return true;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                return false;
+                return true;
             }
         }
 

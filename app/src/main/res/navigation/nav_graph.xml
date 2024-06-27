@@ -36,5 +36,8 @@
         <action
             android:id="@+id/action_ControlFragment_to_MapFragment"
             app:destination="@id/MapFragment" />
+        <action
+            android:id="@+id/action_ControlFragment_to_TeamFragment"
+            app:destination="@id/TeamFragment" />
     </fragment>
 </navigation>
