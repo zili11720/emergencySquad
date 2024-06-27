@@ -2,9 +2,11 @@ package com.example.myapplication;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -58,15 +60,12 @@ public class MapFragment extends Fragment {
                 NavHostFragment.findNavController(MapFragment.this)
                         .navigate(R.id.action_SecondFragment_to_FirstFragment)
         );
-        binding.buttonPhone.setOnClickListener(new View.OnClickListener()
-
-        {
+        binding.buttonPhone.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick (View v){
+            public void onClick(View v) {
                 onPhoneButtonClick(v);
             }
         });
-
 
         webView = binding.mapview;
 
@@ -110,7 +109,6 @@ public class MapFragment extends Fragment {
         }
     }
 
-
     private void getLastLocation() {
         if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -126,6 +124,7 @@ public class MapFragment extends Fragment {
                             Log.d(TAG, "Latitude: " + latitude + ", Longitude: " + longitude);
                             List<double[]> locations = generateRandomLocations(latitude, longitude, 5); // Generate 5 random locations
                             loadMapWithLocation(latitude, longitude, locations);
+                            checkProximityAndPlaySound(requireContext(), latitude, longitude, locations); // Check proximity and play sound
                         } else {
                             Log.d(TAG, "Location is null");
                         }
@@ -142,6 +141,22 @@ public class MapFragment extends Fragment {
             locations.add(new double[]{latitude + latOffset, longitude + lonOffset});
         }
         return locations;
+    }
+
+    private void checkProximityAndPlaySound(Context context, double currentLatitude, double currentLongitude, List<double[]> locations) {
+        final float[] distance = new float[1];
+        for (double[] location : locations) {
+            Location.distanceBetween(currentLatitude, currentLongitude, location[0], location[1], distance);
+            if (distance[0] <= 50) { // If within 50 meters
+                playSound(context);
+                break; // Play sound once if any location is within 50 meters
+            }
+        }
+    }
+
+    private void playSound(Context context) {
+        MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.alert); // Replace 'my_sound' with your actual sound file name without extension
+        mediaPlayer.start();
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -185,7 +200,6 @@ public class MapFragment extends Fragment {
         binding = null;
     }
 
-
     public void onPhoneButtonClick(View view) {
         String phoneNumber ="0507300206"; // Replace with your desired phone number
         Intent intent = new Intent(Intent.ACTION_CALL);
@@ -194,7 +208,7 @@ public class MapFragment extends Fragment {
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
             startActivity(intent);
         } else {
-            Log.d(TAG, "Phone permission not granted.");
+            Log.d(TAG, "Phone permission denied.");
             // Optionally, handle permission not granted case
         }
     }
