@@ -110,13 +110,13 @@ public class FirstFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Boolean isValid) {
-            if (isValid) {
+            //if (isValid) {
                 NavHostFragment.findNavController(FirstFragment.this)
                         .navigate(R.id.action_FirstFragment_to_ControlFragment);
-            } else {
-                Toast.makeText(getActivity(), "Invalid username or password", Toast.LENGTH_SHORT).show();
+            //} else {
+             //   Toast.makeText(getActivity(), "Invalid username or password", Toast.LENGTH_SHORT).show();
             }
-        }
+        //}
     }
 
     @Override

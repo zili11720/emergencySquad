@@ -2,8 +2,10 @@ package com.example.myapplication;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,6 +39,8 @@ public class MapFragment extends Fragment {
     private double latitude;
     private double longitude;
 
+    private static final int REQUEST_PHONE_PERMISSION = 2;
+
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container,
@@ -54,8 +58,20 @@ public class MapFragment extends Fragment {
                 NavHostFragment.findNavController(MapFragment.this)
                         .navigate(R.id.action_SecondFragment_to_FirstFragment)
         );
+        binding.buttonPhone.setOnClickListener(new View.OnClickListener()
+
+        {
+            @Override
+            public void onClick (View v){
+                onPhoneButtonClick(v);
+            }
+        });
+
 
         webView = binding.mapview;
+
+        // Request phone permission when the app is opened
+        requestPhonePermission();
 
         // Initialize fusedLocationClient
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
@@ -70,6 +86,30 @@ public class MapFragment extends Fragment {
             getLastLocation();
         }
     }
+
+    private void requestPhonePermission() {
+        if (ActivityCompat.checkSelfPermission(requireActivity(),
+                Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(requireActivity(),
+                    new String[]{Manifest.permission.CALL_PHONE},
+                    REQUEST_PHONE_PERMISSION);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PHONE_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+                // Optionally handle permission granted
+            } else {
+                // Permission denied
+                Log.d(TAG, "Phone permission denied");
+            }
+        }
+    }
+
 
     private void getLastLocation() {
         if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -143,5 +183,19 @@ public class MapFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+
+    public void onPhoneButtonClick(View view) {
+        String phoneNumber ="0507300206"; // Replace with your desired phone number
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        intent.setData(Uri.parse("tel:" + phoneNumber));
+
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+            startActivity(intent);
+        } else {
+            Log.d(TAG, "Phone permission not granted.");
+            // Optionally, handle permission not granted case
+        }
     }
 }
