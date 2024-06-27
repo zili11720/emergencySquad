@@ -34,6 +34,14 @@ public class ControlFragment extends Fragment {
                         .navigate(R.id.action_ControlFragment_to_MapFragment);
             }
         });
+
+        binding.btn_manage_warriors.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                NavHostFragment.findNavController(ControlFragment.this)
+                        .navigate(R.id.action_ControlFragment_to_TeamFragment);
+            }
+        });
     }
 
     @Override
