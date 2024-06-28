@@ -5,35 +5,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MapFragment">
+    tools:context=".MapFragment"
+    android:background="@color/khaki">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp">
-
-        <Button
-            android:id="@+id/button_second"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/previous"
-            android:backgroundTint="#102820"
-            android:textColor="@android:color/white"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+        android:padding="10dp">
 
         <WebView
             android:id="@+id/mapview"
             android:layout_width="match_parent"
-            android:layout_height="600dp"
-            android:layout_marginTop="10dp"
+            android:layout_height="650dp"
+            android:layout_marginTop="16dp"
             app:layout_constraintBottom_toTopOf="@id/button_emergency"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/button_second"
-            app:layout_constraintVertical_bias="1.0" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Button
             android:id="@+id/button_emergency"
@@ -43,25 +31,34 @@
             android:backgroundTint="#102820"
             android:textColor="@android:color/white"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toStartOf="@id/buttonPhone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/mapview" />
 
-        <Button
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/buttonMessages"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/watch_messages"
+            app:backgroundTint="@color/hunter_green"
+            app:srcCompat="@android:drawable/ic_dialog_email"
+            app:tint="@color/khaki"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/mapview"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:ignore="MissingConstraints" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/buttonPhone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="16dp"
-            android:backgroundTint="@color/hunter_green"
-            android:tint="@color/khaki"
-            android:background="@drawable/baseline_phone_24"
-            android:onClick="onPhoneButtonClick"
-            android:elevation="4dp"
-            android:padding="16dp"
-            android:foreground="?android:attr/selectableItemBackground"
-            tools:ignore="MissingConstraints" />
-
-
+            android:layout_marginStart="56dp"
+            android:contentDescription="@string/call_control"
+            app:backgroundTint="@color/hunter_green"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/mapview"
+            app:layout_constraintStart_toEndOf="@id/buttonMessages"
+            app:srcCompat="@android:drawable/stat_sys_phone_call"
+            app:tint="@color/khaki" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

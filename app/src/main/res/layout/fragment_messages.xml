@@ -1,41 +1,26 @@
+<!-- fragment_messages.xml -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:orientation="vertical" >
-
-  <TextView
-      android:id="@+id/login_title"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:text="@string/messages_updates_title"
-      android:textSize="24sp"
-      android:textColor="@color/hunter_green"
-      />
-
-
-<ListView
-    android:id="@+id/listViewMessages"
     android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight="1"
-    android:background="@color/khaki"
-    />
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+  <ListView
+      android:id="@+id/listViewMessages"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1"
+      android:background="@color/khaki"/>
 
   <LinearLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:orientation="horizontal"
-
-      >
-
+      android:orientation="horizontal">
 
     <EditText
         android:id="@+id/editTextMessage"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        />
-       <!-- android:hint="" -->
+        android:layout_weight="1"/>
 
     <Button
         android:id="@+id/btnSendMessage"
@@ -44,23 +29,6 @@ android:orientation="vertical" >
         android:backgroundTint="#102820"
         android:text="@string/next"
         android:textColor="@android:color/white"
-        android:textColorHint="@color/hunter_green" />
-
-
+        android:textColorHint="@color/hunter_green"/>
   </LinearLayout>
 </LinearLayout>
-
-
-
-
-<!--<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MessagesFragment">
-
-  </androidx.constraintlayout.widget.ConstraintLayout>-->

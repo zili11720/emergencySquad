@@ -1,16 +1,17 @@
 package com.example.myapplication;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ArrayAdapter;
+import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-public class MessagesFragment extends AppCompatActivity {
+public class MessagesFragment extends Fragment {
 
     private ListView listViewMessages;
     private EditText editTextMessage;
@@ -19,16 +20,17 @@ public class MessagesFragment extends AppCompatActivity {
     private ArrayAdapter<String> adapter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_messages);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_messages, container, false);
 
-        listViewMessages = findViewById(R.id.listViewMessages);
-        editTextMessage = findViewById(R.id.editTextMessage);
-        btnSendMessage = findViewById(R.id.btnSendMessage);
+        listViewMessages = view.findViewById(R.id.listViewMessages);
+        editTextMessage = view.findViewById(R.id.editTextMessage);
+        btnSendMessage = view.findViewById(R.id.btnSendMessage);
 
         messages = new ArrayList<>();
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, messages);
+        adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, messages);
         listViewMessages.setAdapter(adapter);
 
         btnSendMessage.setOnClickListener(new View.OnClickListener() {
@@ -42,7 +44,7 @@ public class MessagesFragment extends AppCompatActivity {
                 }
             }
         });
+
+        return view;
     }
 }
-
-

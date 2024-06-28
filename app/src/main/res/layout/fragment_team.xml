@@ -3,14 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="team_members"
-        android:textSize="18sp"
-        android:paddingBottom="8dp"/>
+    android:padding="16dp"
+    android:background="@color/khaki">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/fragment_team"
@@ -24,6 +18,8 @@
         android:id="@+id/btnAddPerson"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="add_member"
+        android:backgroundTint="#102820"
+        android:textColor="@android:color/white"
+        android:text="@string/add_member"
         android:layout_gravity="center"/>
 </LinearLayout>

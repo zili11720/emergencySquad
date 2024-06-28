@@ -23,12 +23,17 @@
     <string name="welcome">Welcome to your safe zone</string>
     <string name="type_a_message">Type a message</string>
     <string name="messages_updates_title">messages:</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="create_new_team">To create your safe zone, please fill the following details:</string>
     <string name="enter_manager_details">Enter Manager Details</string>
     <string name="create">Create</string>
     <string name="create_a_new_team">create a new team</string>
+    <string name="add_member">add a new member</string>
+    <string name="phone_number_text">Phone Number</string>
+    <string name="Address_text">Address</string>
+    <string name="Special_role_text">Role</string>
+    <string name="call_control">Call control</string>
+    <string name="watch_messages">Watch messages</string>
 
 
 </resources>

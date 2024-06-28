@@ -3,15 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".NewMemberFragment">
+    tools:context=".NewMemberFragment"
+    android:background="@color/khaki">
 
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -21,7 +16,7 @@
             android:id="@+id/editTextName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Name" />
+            android:hint="@string/username_text"/>
 
         <EditText
             android:id="@+id/editTextId"
@@ -33,32 +28,34 @@
             android:id="@+id/editTextPhoneNumber"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="PhoneNumber" />
+            android:hint="@string/phone_number_text" />
 
         <EditText
             android:id="@+id/editTextPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Password" />
+            android:hint="@string/password_text" />
 
         <EditText
             android:id="@+id/editTextAddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Address" />
+            android:hint="@string/Address_text" />
 
         <EditText
             android:id="@+id/editTextRole"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Role" />
+            android:hint="@string/Special_role_text" />
 
         <Button
             android:id="@+id/buttonAdd"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add"
-            android:layout_gravity="bottom" />
+            android:backgroundTint="#102820"
+            android:textColor="@android:color/white"
+            android:text="@string/add_member"
+            android:layout_gravity="center" />
     </LinearLayout>
 
 </FrameLayout>

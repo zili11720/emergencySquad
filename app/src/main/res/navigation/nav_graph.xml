@@ -40,6 +40,9 @@
         <action
             android:id="@+id/action_SecondFragment_to_FirstFragment"
             app:destination="@id/FirstFragment" />
+        <action
+            android:id="@+id/action_MapFragment_to_MessagesFragment"
+            app:destination="@id/listViewMessagesFragment" />
     </fragment>
     <fragment
         android:id="@+id/ControlFragment"
@@ -65,7 +68,12 @@
         android:name="com.example.myapplication.NewMemberFragment"
         android:label="Add Member"
         tools:layout="@layout/fragment_new_member">
-
+    </fragment>
+    <fragment
+        android:id="@+id/listViewMessagesFragment"
+        android:name="com.example.myapplication.MessagesFragment"
+        android:label="messages"
+        tools:layout="@layout/fragment_messages">
     </fragment>
 
 

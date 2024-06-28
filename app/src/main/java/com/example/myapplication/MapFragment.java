@@ -56,10 +56,13 @@ public class MapFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        binding.buttonSecond.setOnClickListener(v ->
+        binding.buttonMessages.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 NavHostFragment.findNavController(MapFragment.this)
-                        .navigate(R.id.action_SecondFragment_to_FirstFragment)
-        );
+                        .navigate(R.id.action_MapFragment_to_MessagesFragment);
+            }
+        });
         binding.buttonPhone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -201,7 +204,7 @@ public class MapFragment extends Fragment {
     }
 
     public void onPhoneButtonClick(View view) {
-        String phoneNumber ="0507300206"; // Replace with your desired phone number
+        String phoneNumber ="0587300206"; // Replace with your desired phone number
         Intent intent = new Intent(Intent.ACTION_CALL);
         intent.setData(Uri.parse("tel:" + phoneNumber));
 
