@@ -52,7 +52,7 @@
             android:id="@+id/buttonPhone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="56dp"
+            android:layout_marginStart="8dp"
             android:contentDescription="@string/call_control"
             app:backgroundTint="@color/hunter_green"
             app:layout_constraintBottom_toBottomOf="parent"
