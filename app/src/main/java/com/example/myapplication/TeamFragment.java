@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
@@ -24,9 +25,26 @@ public class TeamFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_team, container, false);
+        Button buttonNavigate = view.findViewById(R.id.btnAddPerson);
+        buttonNavigate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                  NavHostFragment.findNavController(TeamFragment.this)
+                            .navigate(R.id.action_TeamFragment_to_NewMemberFragment);
+
+//                Fragment newFragment = new NewMemberFragment();
+//                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+//                transaction.replace(R.id.fragment_container, newFragment);
+//                transaction.addToBackStack(null);
+//                transaction.commit();
+            }
+        });
         return view;
     }
+
 }
+
 //        // טעינת רשימת האנשים הקיימת
 //        personList = loadPersonList();
 //

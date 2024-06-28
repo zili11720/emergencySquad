@@ -9,7 +9,7 @@
         android:id="@+id/FirstFragment"
         android:name="com.example.myapplication.FirstFragment"
         android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first" >
+        tools:layout="@layout/fragment_first">
 
         <action
             android:id="@+id/action_FirstFragment_to_SecondFragment"
@@ -25,14 +25,17 @@
         android:id="@+id/TeamFragment"
         android:name="com.example.myapplication.TeamFragment"
         android:label="Team Members"
-        tools:layout="@layout/fragment_team" >
+        tools:layout="@layout/fragment_team">
+        <action
+            android:id="@+id/action_TeamFragment_to_NewMemberFragment"
+            app:destination="@id/NewMemberFragment" />
 
     </fragment>
     <fragment
         android:id="@+id/MapFragment"
         android:name="com.example.myapplication.MapFragment"
         android:label="@string/map_fragment_label"
-        tools:layout="@layout/fragment_map" >
+        tools:layout="@layout/fragment_map">
 
         <action
             android:id="@+id/action_SecondFragment_to_FirstFragment"
@@ -42,7 +45,7 @@
         android:id="@+id/ControlFragment"
         android:name="com.example.myapplication.ControlFragment"
         android:label="@string/control_fragment_label"
-        tools:layout="@layout/fragment_control" >
+        tools:layout="@layout/fragment_control">
         <action
             android:id="@+id/action_ControlFragment_to_MapFragment"
             app:destination="@id/MapFragment" />
@@ -54,7 +57,15 @@
         android:id="@+id/NewTeamFragment"
         android:name="com.example.myapplication.NewTeamFragment"
         android:label="New Team"
-        tools:layout="@layout/fragment_new_team" >
+        tools:layout="@layout/fragment_new_team">
+
+    </fragment>
+    <fragment
+        android:id="@+id/NewMemberFragment"
+        android:name="com.example.myapplication.NewMemberFragment"
+        android:label="Add Member"
+        tools:layout="@layout/fragment_new_member">
+
     </fragment>
 
 
