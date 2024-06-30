@@ -9,6 +9,22 @@
     <style>
         #map { height: 100vh; }
     </style>
+
+    <style>
+        .emergency-marker {
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    </style>
 </head>
 <body>
 <div id="map"></div>
@@ -52,6 +68,11 @@
         } else {
             initMap(latitude, longitude, locations);
         }
+    }
+
+    function updateEmergencyLocation(latitude,longitude){
+         var emergencyMarker=L.divIcon({className:'emergency-marker'});
+         var marker=L.marker([latitude,longitude],{icon:emergencyMarker}).addTo(map);
     }
 </script>
 </body>
