@@ -22,10 +22,11 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+
 public class FirstFragment extends Fragment {
 
     private FragmentFirstBinding binding;
-    private static final String LOGIN_URL = "https://app.the-safe-zone.online/users/check";
+    private static final String BASE_URL = "https://app.the-safe-zone.online";
 
     @Override
     public View onCreateView(
@@ -47,7 +48,7 @@ public class FirstFragment extends Fragment {
                         .navigate(R.id.action_FirstFragment_to_NewTeamFragment);
             }
         });
-        
+
         binding.buttonSignIn.setOnClickListener(v -> {
             EditText username = view.findViewById(R.id.edittext_username);
             EditText password = view.findViewById(R.id.edittext_password);
@@ -63,7 +64,9 @@ public class FirstFragment extends Fragment {
         });
     }
 
-    private class ValidateUserTask extends AsyncTask<String, Void, Boolean> {
+    public class ValidateUserTask extends AsyncTask<String, Void, Boolean> {
+        private static final String LOGIN_URL = BASE_URL + "/test-login";
+
         @Override
         protected Boolean doInBackground(String... params) {
             String username = params[0];
@@ -71,24 +74,26 @@ public class FirstFragment extends Fragment {
 
             try {
                 URL url = new URL(LOGIN_URL);
-                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-                httpURLConnection.setRequestMethod("POST");
-                httpURLConnection.setRequestProperty("Content-Type", "application/json; utf-8");
-                httpURLConnection.setRequestProperty("Accept", "application/json");
-                httpURLConnection.setDoOutput(true);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Content-Type", "application/json; utf-8");
+                conn.setRequestProperty("Accept", "application/json");
+                // set this requests to post
+                conn.setDoOutput(true);
 
                 JSONObject jsonInput = new JSONObject();
                 jsonInput.put("username", username);
                 jsonInput.put("password", password);
+                String jsonInputString = jsonInput.toString();
 
-                try (OutputStream os = httpURLConnection.getOutputStream()) {
-                    byte[] input = jsonInput.toString().getBytes("utf-8");
+                try (OutputStream os = conn.getOutputStream()) {
+                    byte[] input = jsonInputString.getBytes("utf-8");
                     os.write(input, 0, input.length);
                 }
 
-                int responseCode = httpURLConnection.getResponseCode();
+                int responseCode = conn.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
-                    BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream(), "utf-8"));
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
                     StringBuilder response = new StringBuilder();
                     String inputLine;
                     while ((inputLine = in.readLine()) != null) {
@@ -98,25 +103,26 @@ public class FirstFragment extends Fragment {
 
                     // Parse the response as JSON
                     JSONObject jsonResponse = new JSONObject(response.toString());
+                    // Log.i("teset",jsonResponse.toString());
                     return jsonResponse.has("status") && jsonResponse.getString("status").equals("success");
                 } else {
-                    return true;
+                    return false;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                return true;
+                return false;
             }
         }
 
         @Override
         protected void onPostExecute(Boolean isValid) {
-            //if (isValid) {
+            if (isValid) {
                 NavHostFragment.findNavController(FirstFragment.this)
                         .navigate(R.id.action_FirstFragment_to_ControlFragment);
-            //} else {
-             //   Toast.makeText(getActivity(), "Invalid username or password", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getActivity(), "Invalid username or password", Toast.LENGTH_SHORT).show();
             }
-        //}
+        }
     }
 
     @Override
