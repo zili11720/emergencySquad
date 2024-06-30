@@ -46,7 +46,14 @@ dependencies {
     implementation libs.play.services.location
     implementation libs.play.services.maps
     implementation libs.activity
+    implementation libs.legacy.support.v4
+    implementation libs.recyclerview
+    implementation libs.volley
+    implementation libs.firebase.crashlytics.buildtools
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+
+
 }
