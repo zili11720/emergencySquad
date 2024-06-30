@@ -70,15 +70,6 @@ public class MapFragment extends Fragment {
             }
         });
 
-//הכפתור של הלחצן מצוקה אביטל
-        binding.buttonEmergency.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // קוד להפעלת האפקט שאת רוצה להוסיף
-//                animateEmergencyLocation(v);
-            }
-        });
-
 
         webView = binding.mapview;
 
@@ -226,10 +217,6 @@ public class MapFragment extends Fragment {
             // Optionally, handle permission not granted case
         }
     }
-    //פונקציה שתגרום לנקודה במפה להבהב ברגע שמופעל לחצן מצוקה
-    public void animateEmergencyLocation(View v){
-        String jsCode = "javascript:updateEmergencyLocation(" + latitude + ", " + longitude + ")";
-        webView.evaluateJavascript(jsCode, null);
-    }
+
 
 }
