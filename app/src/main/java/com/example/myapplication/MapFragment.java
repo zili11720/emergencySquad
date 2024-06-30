@@ -70,15 +70,6 @@ public class MapFragment extends Fragment {
             }
         });
 
-//הכפתור של הלחצן מצוקה אביטל
-        binding.buttonEmergency.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // קוד להפעלת האפקט שאת רוצה להוסיף
-//                animateEmergencyLocation(v);
-            }
-        });
-
 
         webView = binding.mapview;
 
@@ -226,10 +217,38 @@ public class MapFragment extends Fragment {
             // Optionally, handle permission not granted case
         }
     }
-    //פונקציה שתגרום לנקודה במפה להבהב ברגע שמופעל לחצן מצוקה
-    public void animateEmergencyLocation(View v){
-        String jsCode = "javascript:updateEmergencyLocation(" + latitude + ", " + longitude + ")";
-        webView.evaluateJavascript(jsCode, null);
-    }
+//פונקציה למציאת הנקודה הקרובה ביותר עבור כל המיקומים במפה
+//    public class MapUtils {
+//
+//        // פונקציה לחישוב מרחק בין שתי נקודות במפה
+//        private static float distanceBetweenLocations(Location loc1, Location loc2) {
+//            float[] results = new float[1];
+//            Location.distanceBetween(loc1.getLatitude(), loc1.getLongitude(),
+//                    loc2.getLatitude(), loc2.getLongitude(), results);
+//            return results[0];
+//        }
+//
+//        // פונקציה למציאת נקודת האמצע של רשימת מיקומים
+//        public static Location findCenterPoint(List<Location> locations) {
+//            Location centerPoint = null;
+//            double minDistanceSum = Double.MAX_VALUE;
+//
+//            // ללולאה כדי לחשב את נקודת האמצע
+//            for (Location loc : locations) {
+//                double distanceSum = 0;
+//                for (Location otherLoc : locations) {
+//                    if (!loc.equals(otherLoc)) {
+//                        distanceSum += distanceBetweenLocations(loc, otherLoc);
+//                    }
+//                }
+//                if (distanceSum < minDistanceSum) {
+//                    minDistanceSum = distanceSum;
+//                    centerPoint = loc;
+//                }
+//            }
+//
+//            return centerPoint;
+//        }
+//    }
 
 }
