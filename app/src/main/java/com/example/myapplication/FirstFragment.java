@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +22,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
 
 public class FirstFragment extends Fragment {
 
@@ -64,21 +64,20 @@ public class FirstFragment extends Fragment {
         });
     }
 
-    public class ValidateUserTask extends AsyncTask<String, Void, Boolean> {
+    public class ValidateUserTask extends AsyncTask<String, Void, Pair<Boolean, String>> {
         private static final String LOGIN_URL = BASE_URL + "/test-login";
 
         @Override
-        protected Boolean doInBackground(String... params) {
+        protected Pair<Boolean, String> doInBackground(String... params) {
             String username = params[0];
             String password = params[1];
 
             try {
                 URL url = new URL(LOGIN_URL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
+                conn.setRequestMethod("POST");  // Change to POST
                 conn.setRequestProperty("Content-Type", "application/json; utf-8");
                 conn.setRequestProperty("Accept", "application/json");
-                // set this requests to post
                 conn.setDoOutput(true);
 
                 JSONObject jsonInput = new JSONObject();
@@ -101,24 +100,32 @@ public class FirstFragment extends Fragment {
                     }
                     in.close();
 
-                    // Parse the response as JSON
                     JSONObject jsonResponse = new JSONObject(response.toString());
-                    // Log.i("teset",jsonResponse.toString());
-                    return jsonResponse.has("status") && jsonResponse.getString("status").equals("success");
+                    String status = jsonResponse.getString("status");
+                    return new Pair<>(true, status);
                 } else {
-                    return false;
+                    return new Pair<>(false, null);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                return false;
+                return new Pair<>(false, null);
             }
         }
 
         @Override
-        protected void onPostExecute(Boolean isValid) {
+        protected void onPostExecute(Pair<Boolean, String> result) {
+            Boolean isValid = result.first;
+            String status = result.second;
             if (isValid) {
-                NavHostFragment.findNavController(FirstFragment.this)
-                        .navigate(R.id.action_FirstFragment_to_ControlFragment);
+                if ("success_is_admin".equals(status)) {
+                    NavHostFragment.findNavController(FirstFragment.this)
+                            .navigate(R.id.action_FirstFragment_to_ControlFragment);
+                } else if ("success_is_not_admin".equals(status)) {
+                    NavHostFragment.findNavController(FirstFragment.this)
+                            .navigate(R.id.action_FirstFragment_to_MapFragment);
+                } else {
+                    Toast.makeText(getActivity(), "Invalid status returned", Toast.LENGTH_SHORT).show();
+                }
             } else {
                 Toast.makeText(getActivity(), "Invalid username or password", Toast.LENGTH_SHORT).show();
             }

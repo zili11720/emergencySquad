@@ -12,15 +12,16 @@
         tools:layout="@layout/fragment_first">
 
         <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/MapFragment" />
-        <action
             android:id="@+id/action_FirstFragment_to_ControlFragment"
             app:destination="@id/ControlFragment" />
         <action
             android:id="@+id/action_FirstFragment_to_NewTeamFragment"
             app:destination="@id/NewTeamFragment" />
+        <action
+            android:id="@+id/action_FirstFragment_to_MapFragment"
+            app:destination="@id/MapFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/TeamFragment"
         android:name="com.example.myapplication.TeamFragment"
@@ -29,8 +30,8 @@
         <action
             android:id="@+id/action_TeamFragment_to_NewMemberFragment"
             app:destination="@id/NewMemberFragment" />
-
     </fragment>
+
     <fragment
         android:id="@+id/MapFragment"
         android:name="com.example.myapplication.MapFragment"
@@ -44,6 +45,7 @@
             android:id="@+id/action_MapFragment_to_MessagesFragment"
             app:destination="@id/listViewMessagesFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/ControlFragment"
         android:name="com.example.myapplication.ControlFragment"
@@ -56,25 +58,23 @@
             android:id="@+id/action_ControlFragment_to_TeamFragment"
             app:destination="@id/TeamFragment" />
     </fragment>
+
     <fragment
         android:id="@+id/NewTeamFragment"
         android:name="com.example.myapplication.NewTeamFragment"
         android:label="New Team"
-        tools:layout="@layout/fragment_new_team">
+        tools:layout="@layout/fragment_new_team" />
 
-    </fragment>
     <fragment
         android:id="@+id/NewMemberFragment"
         android:name="com.example.myapplication.NewMemberFragment"
         android:label="Add Member"
-        tools:layout="@layout/fragment_new_member">
-    </fragment>
+        tools:layout="@layout/fragment_new_member" />
+
     <fragment
         android:id="@+id/listViewMessagesFragment"
         android:name="com.example.myapplication.MessagesFragment"
         android:label="messages"
-        tools:layout="@layout/fragment_messages">
-    </fragment>
-
+        tools:layout="@layout/fragment_messages" />
 
 </navigation>
