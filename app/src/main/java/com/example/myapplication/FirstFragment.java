@@ -59,13 +59,23 @@ public class FirstFragment extends Fragment {
             if (usernameText.isEmpty() || passwordText.isEmpty()) {
                 Toast.makeText(getActivity(), "Please enter username and password", Toast.LENGTH_SHORT).show();
             } else {
-                new ValidateUserTask().execute(usernameText, passwordText);
+                // Create a bundle and add the username to it
+                Bundle bundle = new Bundle();
+                bundle.putString("username", usernameText);
+
+                // Pass the bundle to the AsyncTask
+                new ValidateUserTask(bundle).execute(usernameText, passwordText);
             }
         });
     }
 
     public class ValidateUserTask extends AsyncTask<String, Void, Pair<Boolean, String>> {
         private static final String LOGIN_URL = BASE_URL + "/test-login";
+
+        private final Bundle bundle;
+        public ValidateUserTask(Bundle bundle) {
+            this.bundle = bundle;
+        }
 
         @Override
         protected Pair<Boolean, String> doInBackground(String... params) {
@@ -119,10 +129,10 @@ public class FirstFragment extends Fragment {
             if (isValid) {
                 if ("success_is_admin".equals(status)) {
                     NavHostFragment.findNavController(FirstFragment.this)
-                            .navigate(R.id.action_FirstFragment_to_ControlFragment);
+                            .navigate(R.id.action_FirstFragment_to_ControlFragment,bundle);
                 } else if ("success_is_not_admin".equals(status)) {
                     NavHostFragment.findNavController(FirstFragment.this)
-                            .navigate(R.id.action_FirstFragment_to_MapFragment);
+                            .navigate(R.id.action_FirstFragment_to_MapFragment,bundle);
                 } else {
                     Toast.makeText(getActivity(), "Invalid status returned", Toast.LENGTH_SHORT).show();
                 }
