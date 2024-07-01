@@ -8,7 +8,9 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +18,7 @@ import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -27,6 +30,11 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import org.json.JSONObject;
+
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -40,8 +48,13 @@ public class MapFragment extends Fragment {
 
     private double latitude;
     private double longitude;
-
+    private double lastLatitude;
+    private double lastLongitude;
+    String username = "";
     private static final int REQUEST_PHONE_PERMISSION = 2;
+
+    private Handler handler = new Handler();
+    private Runnable locationRunnable;
 
     @Override
     public View onCreateView(
@@ -58,7 +71,7 @@ public class MapFragment extends Fragment {
 
         // Retrieve the username from the bundle
         Bundle bundle = getArguments();
-        String username = "";
+
         if (bundle != null) {
             username = bundle.getString("username", "defaultUser"); // Default to "defaultUser" if username is not found
         }
@@ -76,8 +89,6 @@ public class MapFragment extends Fragment {
                 onPhoneButtonClick(v);
             }
         });
-
-
 
         webView = binding.mapview;
 
@@ -97,9 +108,18 @@ public class MapFragment extends Fragment {
             getLastLocation(username);
         }
 
+        // Initialize location update runnable
+        locationRunnable = new Runnable() {
+            @Override
+            public void run() {
+                checkLocationChange();
+                handler.postDelayed(this, 5000); // Run every 5 seconds
+            }
+        };
+        handler.post(locationRunnable);
     }
 
-   //phone---------------------------------------------
+    // phone---------------------------------------------
     private void requestPhonePermission() {
         if (ActivityCompat.checkSelfPermission(requireActivity(),
                 Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
@@ -122,8 +142,9 @@ public class MapFragment extends Fragment {
             }
         }
     }
+
     public void onPhoneButtonClick(View view) {
-        String phoneNumber ="0587300206"; // Replace with your desired phone number
+        String phoneNumber = "0587300206"; // Replace with your desired phone number
         Intent intent = new Intent(Intent.ACTION_CALL);
         intent.setData(Uri.parse("tel:" + phoneNumber));
 
@@ -135,8 +156,7 @@ public class MapFragment extends Fragment {
         }
     }
 
-
-    //locations----------------------------------------------------------------------------
+    // locations----------------------------------------------------------------------------
     private void getLastLocation(String username) {
         if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -149,10 +169,38 @@ public class MapFragment extends Fragment {
                         if (location != null) {
                             latitude = location.getLatitude();
                             longitude = location.getLongitude();
+                            lastLatitude = latitude;
+                            lastLongitude = longitude;
                             Log.d(TAG, "Latitude: " + latitude + ", Longitude: " + longitude);
                             List<double[]> locations = generateRandomLocations(latitude, longitude, 5); // Generate 5 random locations
                             loadMapWithLocation(latitude, longitude, locations, username);
                             checkProximityAndPlaySound(requireContext(), latitude, longitude, locations); // Check proximity and play sound
+                            sendLocationToServer(latitude, longitude, username); // Send location to server
+                        } else {
+                            Log.d(TAG, "Location is null");
+                        }
+                    }
+                });
+    }
+
+    private void checkLocationChange() {
+        if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(requireActivity(), new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            double newLatitude = location.getLatitude();
+                            double newLongitude = location.getLongitude();
+                            if (newLatitude != lastLatitude || newLongitude != lastLongitude) {
+                                lastLatitude = newLatitude;
+                                lastLongitude = newLongitude;
+                                Log.d(TAG, "New Latitude: " + newLatitude + ", New Longitude: " + newLongitude);
+                                sendLocationToServer(newLatitude, newLongitude, username);
+                            }
                         } else {
                             Log.d(TAG, "Location is null");
                         }
@@ -206,9 +254,7 @@ public class MapFragment extends Fragment {
         return json.toString();
     }
 
-
-
-    ///sound-----------------------------------------------------------------------------
+    // sound-----------------------------------------------------------------------------
     private void checkProximityAndPlaySound(Context context, double currentLatitude, double currentLongitude, List<double[]> locations) {
         final float[] distance = new float[1];
         for (double[] location : locations) {
@@ -225,30 +271,52 @@ public class MapFragment extends Fragment {
         mediaPlayer.start();
     }
 
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+        handler.removeCallbacks(locationRunnable); // Stop the runnable when the fragment is destroyed
     }
 
-    //emergency-------------------------------------------------------------------
-    //    //פונקציה שתגרום לנקודה במפה להבהב ברגע שמופעל לחצן מצוקה
-//    public void animateEmergencyLocation(View v) {
-//        String jsCode = "javascript:updateEmergencyLocation(" + latitude + ", " + longitude + ")";
-//        webView.evaluateJavascript(jsCode, null);
-//    }
+    @SuppressLint("StaticFieldLeak")
+    private void sendLocationToServer(double latitude, double longitude, String username) {
+        new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Void... voids) {
+                try {
+                    URL url = new URL("https://app.the-safe-zone.online/add_location/");
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("POST");
+                    connection.setRequestProperty("Content-Type", "application/json");
+                    connection.setDoOutput(true);
 
+                    JSONObject jsonParam = new JSONObject();
+                    jsonParam.put("latitude", latitude);
+                    jsonParam.put("longitude", longitude);
+                    jsonParam.put("username", username);
 
-//        //הכפתור של הלחצן מצוקה אביטל
-//        binding.buttonEmergency.setOnClickListener(new View.OnClickListener()
-//        {
-//            @Override
-//            public void onClick(View v)
-//            {
-//                // קוד להפעלת האפקט שאת רוצה להוסיף
-//                animateEmergencyLocation(v);
-//            }
-//        } );
+                    OutputStream os = connection.getOutputStream();
+                    os.write(jsonParam.toString().getBytes());
+                    os.flush();
+                    os.close();
 
+                    int responseCode = connection.getResponseCode();
+                    connection.disconnect();
+                    return responseCode == HttpURLConnection.HTTP_OK;
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+
+            @SuppressLint("StaticFieldLeak")
+            @Override
+            protected void onPostExecute(Boolean success) {
+                super.onPostExecute(success);
+                String message = success ? "Location sent successfully" : "Failed to send location";
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        }.execute();
+    }
 }
