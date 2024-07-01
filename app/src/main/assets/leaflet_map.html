@@ -30,6 +30,12 @@
 <div id="map"></div>
 <script>
     var map;
+    var customIcon = L.icon({
+        iconUrl: 'file:///android_asset/location-icon1.png',
+        iconSize: [38, 40],
+        iconAnchor: [22, 94],
+        popupAnchor: [-3, -76]
+    });
 
     function initMap(latitude, longitude, locations, username) {
         map = L.map('map').setView([latitude, longitude], 19);
@@ -38,13 +44,6 @@
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             maxZoom: 22
         }).addTo(map);
-
-        var customIcon = L.icon({
-            iconUrl: 'file:///android_asset/location-icon1.png',
-            iconSize: [38, 40],
-            iconAnchor: [22, 94],
-            popupAnchor: [-3, -76]
-        });
 
         L.marker([latitude, longitude], { icon: customIcon }).addTo(map)
             .bindPopup(username)
@@ -60,6 +59,16 @@
     function updateMapLocation(latitude, longitude, locations, username) {
         if (map) {
             map.setView([latitude, longitude], 19);
+            map.eachLayer(function (layer) {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            L.marker([latitude, longitude], { icon: customIcon }).addTo(map)
+                .bindPopup(username)
+                .openPopup();
+
             // Update markers for multiple locations
             locations.forEach(function(location) {
                 L.marker([location[0], location[1]], { icon: customIcon }).addTo(map)

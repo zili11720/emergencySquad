@@ -10,7 +10,6 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +17,6 @@ import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -50,13 +48,10 @@ public class MapFragment extends Fragment {
 
     private double latitude;
     private double longitude;
-    private double lastLatitude;
-    private double lastLongitude;
+    private double lastLatitude = Double.NaN;
+    private double lastLongitude = Double.NaN;
     String username = "";
     private static final int REQUEST_PHONE_PERMISSION = 2;
-
-    private Handler handler = new Handler();
-    private Runnable locationRunnable;
 
     private List<double[]> locations = new ArrayList<>();
 
@@ -109,24 +104,11 @@ public class MapFragment extends Fragment {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     1);
         } else {
-            getLastLocation(username);
+            loadMap();
         }
-
-        // Initialize location update runnable
-        locationRunnable = new Runnable() {
-            @Override
-            public void run() {
-                checkLocationChange();
-                handler.postDelayed(this, 5000); // Run every 5 seconds
-            }
-        };
-        handler.post(locationRunnable);
-
-        // Fetch locations from server
-        fetchLocationsFromServer();
     }
 
-    // phone---------------------------------------------
+    // Phone Permission
     private void requestPhonePermission() {
         if (ActivityCompat.checkSelfPermission(requireActivity(),
                 Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
@@ -163,7 +145,28 @@ public class MapFragment extends Fragment {
         }
     }
 
-    // locations----------------------------------------------------------------------------
+    // Locations
+    private void loadMap() {
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                Log.d(TAG, "WebView loaded URL: " + url);
+                // Get last known location and load map with it
+                getLastLocation(username);
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                Log.e(TAG, "WebView error: " + description + " at " + failingUrl);
+            }
+        });
+        webView.loadUrl("file:///android_asset/leaflet_map.html");
+        Log.d(TAG, "Loading URL: file:///android_asset/leaflet_map.html");
+    }
+
     private void getLastLocation(String username) {
         if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -176,38 +179,15 @@ public class MapFragment extends Fragment {
                         if (location != null) {
                             latitude = location.getLatitude();
                             longitude = location.getLongitude();
-                            lastLatitude = latitude;
-                            lastLongitude = longitude;
-                            Log.d(TAG, "Latitude: " + latitude + ", Longitude: " + longitude);
-                            //List<double[]> locations = generateRandomLocations(latitude, longitude, 5); // Generate 5 random locations
-                            fetchLocationsFromServer();
-                            loadMapWithLocation(latitude, longitude, locations, username);
-                            checkProximityAndPlaySound(requireContext(), latitude, longitude, locations); // Check proximity and play sound
-                            sendLocationToServer(latitude, longitude, username); // Send location to server
-                        } else {
-                            Log.d(TAG, "Location is null");
-                        }
-                    }
-                });
-    }
-
-    private void checkLocationChange() {
-        if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(requireActivity(), new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        if (location != null) {
-                            double newLatitude = location.getLatitude();
-                            double newLongitude = location.getLongitude();
-                            if (newLatitude != lastLatitude || newLongitude != lastLongitude) {
-                                lastLatitude = newLatitude;
-                                lastLongitude = newLongitude;
-                                Log.d(TAG, "New Latitude: " + newLatitude + ", New Longitude: " + newLongitude);
-                                sendLocationToServer(newLatitude, newLongitude, username);
+                            if (hasLocationChanged(latitude, longitude)) {
+                                Log.d(TAG, "Latitude: " + latitude + ", Longitude: " + longitude);
+                                // Fetch locations from the server instead of generating random ones
+                                fetchLocationsFromServer();
+                                // Send current location to the server
+                                sendLocationToServer(latitude, longitude, username);
+                                // Update last known location
+                                lastLatitude = latitude;
+                                lastLongitude = longitude;
                             }
                         } else {
                             Log.d(TAG, "Location is null");
@@ -216,37 +196,14 @@ public class MapFragment extends Fragment {
                 });
     }
 
-//    private List<double[]> generateRandomLocations(double latitude, double longitude, int count) {
-//        List<double[]> locations = new ArrayList<>();
-//        Random random = new Random();
-//        for (int i = 0; i < count; i++) {
-//            double latOffset = (random.nextDouble() - 0.5) / 1000; // random offset in the range of ±0.0005
-//            double lonOffset = (random.nextDouble() - 0.5) / 1000; // random offset in the range of ±0.0005
-//            locations.add(new double[]{latitude + latOffset, longitude + lonOffset});
-//        }
-//        return locations;
-//    }
+    private boolean hasLocationChanged(double latitude, double longitude) {
+        return Double.isNaN(lastLatitude) || Double.isNaN(lastLongitude) || lastLatitude != latitude || lastLongitude != longitude;
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     private void loadMapWithLocation(double latitude, double longitude, List<double[]> locations, String username) {
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                Log.d(TAG, "WebView loaded URL: " + url);
-                String jsCode = "javascript:updateMapLocation(" + latitude + ", " + longitude + ", " + locationsToJson(locations) + ", '" + username + "')";
-                webView.evaluateJavascript(jsCode, null);
-            }
-
-            @Override
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                Log.e(TAG, "WebView error: " + description + " at " + failingUrl);
-            }
-        });
-        webView.loadUrl("file:///android_asset/leaflet_map.html");
-        Log.d(TAG, "Loading URL: file:///android_asset/leaflet_map.html");
+        String jsCode = "javascript:updateMapLocation(" + latitude + ", " + longitude + ", " + locationsToJson(locations) + ", '" + username + "')";
+        webView.evaluateJavascript(jsCode, null);
     }
 
     private String locationsToJson(List<double[]> locations) {
@@ -262,7 +219,7 @@ public class MapFragment extends Fragment {
         return json.toString();
     }
 
-    // sound-----------------------------------------------------------------------------
+    // Sound
     private void checkProximityAndPlaySound(Context context, double currentLatitude, double currentLongitude, List<double[]> locations) {
         final float[] distance = new float[1];
         for (double[] location : locations) {
@@ -279,105 +236,108 @@ public class MapFragment extends Fragment {
         mediaPlayer.start();
     }
 
+    // Server
+    private void sendLocationToServer(double latitude, double longitude, String username) {
+        new SendLocationTask().execute(latitude, longitude, username);
+    }
+
+    private class SendLocationTask extends AsyncTask<Object, Void, Void> {
+        @Override
+        protected Void doInBackground(Object... params) {
+            double latitude = (double) params[0];
+            double longitude = (double) params[1];
+            String username = (String) params[2];
+            try {
+                URL url = new URL("https://app.the-safe-zone.online/add_location/");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                conn.setDoOutput(true);
+
+                JSONObject jsonParam = new JSONObject();
+                jsonParam.put("latitude", latitude);
+                jsonParam.put("longitude", longitude);
+                jsonParam.put("username", username);
+
+                OutputStream os = conn.getOutputStream();
+                os.write(jsonParam.toString().getBytes("UTF-8"));
+                os.close();
+
+                int responseCode = conn.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    Log.d(TAG, "Location updated successfully");
+                } else {
+                    Log.d(TAG, "Failed to update location. Response code: " + responseCode);
+                }
+                conn.disconnect();
+            } catch (Exception e) {
+                Log.e(TAG, "Error updating location", e);
+            }
+            return null;
+        }
+    }
+
+    private void fetchLocationsFromServer() {
+        new FetchLocationsTask().execute();
+    }
+
+    private class FetchLocationsTask extends AsyncTask<Void, Void, List<double[]>> {
+        @Override
+        protected List<double[]> doInBackground(Void... voids) {
+            List<double[]> locations = new ArrayList<>();
+            try {
+                URL url = new URL("https://app.the-safe-zone.online/get-locations");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+
+                int responseCode = conn.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    String inputLine;
+                    StringBuilder response = new StringBuilder();
+
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+
+                    JSONArray jsonArray = new JSONArray(response.toString());
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                        double lat = jsonObject.getDouble("latitude");
+                        double lon = jsonObject.getDouble("longitude");
+                        locations.add(new double[]{lat, lon});
+                    }
+
+                } else {
+
+                    Log.d(TAG, "Failed to fetch locations. Response code: " + responseCode);
+                }
+                conn.disconnect();
+            } catch (Exception e) {
+                Log.e(TAG, "Error fetching locations", e);
+            }
+            return locations;
+        }
+
+        @Override
+        protected void onPostExecute(List<double[]> fetchedLocations) {
+            super.onPostExecute(fetchedLocations);
+            if (fetchedLocations != null) {
+                locations.clear();
+                locations.addAll(fetchedLocations);
+                // Load the map with the updated locations
+                loadMapWithLocation(latitude, longitude, locations, username);
+                // Check proximity to the fetched locations and play sound if necessary
+                checkProximityAndPlaySound(requireContext(), latitude, longitude, fetchedLocations);
+            }
+        }
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
-        handler.removeCallbacks(locationRunnable); // Stop the runnable when the fragment is destroyed
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private void sendLocationToServer(double latitude, double longitude, String username) {
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... voids) {
-                try {
-                    URL url = new URL("https://app.the-safe-zone.online/add_location/");
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    connection.setRequestMethod("POST");
-                    connection.setRequestProperty("Content-Type", "application/json");
-                    connection.setDoOutput(true);
-
-                    JSONObject jsonParam = new JSONObject();
-                    jsonParam.put("latitude", latitude);
-                    jsonParam.put("longitude", longitude);
-                    jsonParam.put("username", username);
-
-                    OutputStream os = connection.getOutputStream();
-                    os.write(jsonParam.toString().getBytes());
-                    os.flush();
-                    os.close();
-
-                    int responseCode = connection.getResponseCode();
-                    connection.disconnect();
-                    return responseCode == HttpURLConnection.HTTP_OK;
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
-            }
-
-            @Override
-            protected void onPostExecute(Boolean success) {
-                super.onPostExecute(success);
-                String message = success ? "Location sent successfully" : "Failed to send location";
-                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-            }
-        }.execute();
-    }
-
-    // Fetch locations from server
-    @SuppressLint("StaticFieldLeak")
-    private void fetchLocationsFromServer() {
-        new AsyncTask<Void, Void, List<double[]>>() {
-            @Override
-            protected List<double[]> doInBackground(Void... voids) {
-                List<double[]> locations1 = new ArrayList<>();
-                try {
-                    URL url = new URL("https://app.the-safe-zone.online/get-locations/");
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    connection.setRequestMethod("GET");
-                    connection.setRequestProperty("Content-Type", "application/json");
-                    connection.setDoInput(true);
-
-                    int responseCode = connection.getResponseCode();
-                    if (responseCode == HttpURLConnection.HTTP_OK) {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                        StringBuilder response = new StringBuilder();
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            response.append(line);
-                        }
-                        reader.close();
-
-                        JSONArray jsonArray = new JSONArray(response.toString());
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            JSONObject jsonObject = jsonArray.getJSONObject(i);
-                            double lat = jsonObject.getDouble("latitude");
-                            double lon = jsonObject.getDouble("longitude");
-                            locations1.add(new double[]{lat, lon});
-                        }
-                    }
-                    connection.disconnect();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                locations=locations1;
-                return locations1;
-            }
-
-            @Override
-            protected void onPostExecute(List<double[]> locations) {
-                super.onPostExecute(locations);
-                if (!locations.isEmpty()) {
-                    Log.d(TAG, "Fetched locations: " + locationsToJson(locations));
-                    // Update map with fetched locations
-                    loadMapWithLocation(latitude, longitude, locations, username);
-                } else {
-                    Log.d(TAG, "No locations fetched");
-                }
-            }
-        }.execute();
     }
 }
