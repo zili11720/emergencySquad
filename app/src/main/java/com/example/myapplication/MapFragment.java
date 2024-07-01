@@ -56,6 +56,13 @@ public class MapFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Retrieve the username from the bundle
+        Bundle bundle = getArguments();
+        String username = "";
+        if (bundle != null) {
+            username = bundle.getString("username", "defaultUser"); // Default to "defaultUser" if username is not found
+        }
+
         binding.buttonMessages.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -71,16 +78,6 @@ public class MapFragment extends Fragment {
         });
 
 
-         //הכפתור של הלחצן מצוקה אביטל
-        binding.buttonEmergency.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                // קוד להפעלת האפקט שאת רוצה להוסיף
-                animateEmergencyLocation(v);
-            }
-        } );
 
         webView = binding.mapview;
 
@@ -97,11 +94,12 @@ public class MapFragment extends Fragment {
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     1);
         } else {
-            getLastLocation();
+            getLastLocation(username);
         }
 
     }
 
+   //phone---------------------------------------------
     private void requestPhonePermission() {
         if (ActivityCompat.checkSelfPermission(requireActivity(),
                 Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
@@ -124,8 +122,22 @@ public class MapFragment extends Fragment {
             }
         }
     }
+    public void onPhoneButtonClick(View view) {
+        String phoneNumber ="0587300206"; // Replace with your desired phone number
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        intent.setData(Uri.parse("tel:" + phoneNumber));
 
-    private void getLastLocation() {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+            startActivity(intent);
+        } else {
+            Log.d(TAG, "Phone permission denied.");
+            // Optionally, handle permission not granted case
+        }
+    }
+
+
+    //locations----------------------------------------------------------------------------
+    private void getLastLocation(String username) {
         if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -139,7 +151,7 @@ public class MapFragment extends Fragment {
                             longitude = location.getLongitude();
                             Log.d(TAG, "Latitude: " + latitude + ", Longitude: " + longitude);
                             List<double[]> locations = generateRandomLocations(latitude, longitude, 5); // Generate 5 random locations
-                            loadMapWithLocation(latitude, longitude, locations);
+                            loadMapWithLocation(latitude, longitude, locations, username);
                             checkProximityAndPlaySound(requireContext(), latitude, longitude, locations); // Check proximity and play sound
                         } else {
                             Log.d(TAG, "Location is null");
@@ -159,24 +171,8 @@ public class MapFragment extends Fragment {
         return locations;
     }
 
-    private void checkProximityAndPlaySound(Context context, double currentLatitude, double currentLongitude, List<double[]> locations) {
-        final float[] distance = new float[1];
-        for (double[] location : locations) {
-            Location.distanceBetween(currentLatitude, currentLongitude, location[0], location[1], distance);
-            if (distance[0] <= 50) { // If within 50 meters
-                playSound(context);
-                break; // Play sound once if any location is within 50 meters
-            }
-        }
-    }
-
-    private void playSound(Context context) {
-        MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.alert); // Replace 'my_sound' with your actual sound file name without extension
-        mediaPlayer.start();
-    }
-
     @SuppressLint("SetJavaScriptEnabled")
-    private void loadMapWithLocation(double latitude, double longitude, List<double[]> locations) {
+    private void loadMapWithLocation(double latitude, double longitude, List<double[]> locations, String username) {
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
@@ -184,7 +180,7 @@ public class MapFragment extends Fragment {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 Log.d(TAG, "WebView loaded URL: " + url);
-                String jsCode = "javascript:updateMapLocation(" + latitude + ", " + longitude + ", " + locationsToJson(locations) + ")";
+                String jsCode = "javascript:updateMapLocation(" + latitude + ", " + longitude + ", " + locationsToJson(locations) + ", '" + username + "')";
                 webView.evaluateJavascript(jsCode, null);
             }
 
@@ -210,65 +206,49 @@ public class MapFragment extends Fragment {
         return json.toString();
     }
 
+
+
+    ///sound-----------------------------------------------------------------------------
+    private void checkProximityAndPlaySound(Context context, double currentLatitude, double currentLongitude, List<double[]> locations) {
+        final float[] distance = new float[1];
+        for (double[] location : locations) {
+            Location.distanceBetween(currentLatitude, currentLongitude, location[0], location[1], distance);
+            if (distance[0] <= 50) { // If within 50 meters
+                playSound(context);
+                break; // Play sound once if any location is within 50 meters
+            }
+        }
+    }
+
+    private void playSound(Context context) {
+        MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.bird); // Replace 'my_sound' with your actual sound file name without extension
+        mediaPlayer.start();
+    }
+
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
     }
 
-    public void onPhoneButtonClick(View view) {
-        String phoneNumber ="0587300206"; // Replace with your desired phone number
-        Intent intent = new Intent(Intent.ACTION_CALL);
-        intent.setData(Uri.parse("tel:" + phoneNumber));
-
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
-            startActivity(intent);
-        } else {
-            Log.d(TAG, "Phone permission denied.");
-            // Optionally, handle permission not granted case
-        }
-    }
-
-
-
-    //פונקציה שתגרום לנקודה במפה להבהב ברגע שמופעל לחצן מצוקה
-    public void animateEmergencyLocation(View v) {
-        String jsCode = "javascript:updateEmergencyLocation(" + latitude + ", " + longitude + ")";
-        webView.evaluateJavascript(jsCode, null);
-
-    }
-    //פונקציה למציאת הנקודה הקרובה ביותר לכל המיקומים במפה
-//    public class MapUtils {
-//
-//        // פונקציה לחישוב מרחק בין שתי נקודות במפה
-//        private static float distanceBetweenLocations(Location loc1, Location loc2) {
-//            float[] results = new float[1];
-//            Location.distanceBetween(loc1.getLatitude(), loc1.getLongitude(),
-//                    loc2.getLatitude(), loc2.getLongitude(), results);
-//            return results[0];
-//        }
-//
-//        // פונקציה למציאת נקודת האמצע של רשימת מיקומים
-//        public static Location findCenterPoint(List<Location> locations) {
-//            Location centerPoint = null;
-//            double minDistanceSum = Double.MAX_VALUE;
-//
-//            // ללולאה כדי לחשב את נקודת האמצע
-//            for (Location loc : locations) {
-//                double distanceSum = 0;
-//                for (Location otherLoc : locations) {
-//                    if (!loc.equals(otherLoc)) {
-//                        distanceSum += distanceBetweenLocations(loc, otherLoc);
-//                    }
-//                }
-//                if (distanceSum < minDistanceSum) {
-//                    minDistanceSum = distanceSum;
-//                    centerPoint = loc;
-//                }
-//            }
-//
-//            return centerPoint;
-//        }
+    //emergency-------------------------------------------------------------------
+    //    //פונקציה שתגרום לנקודה במפה להבהב ברגע שמופעל לחצן מצוקה
+//    public void animateEmergencyLocation(View v) {
+//        String jsCode = "javascript:updateEmergencyLocation(" + latitude + ", " + longitude + ")";
+//        webView.evaluateJavascript(jsCode, null);
 //    }
+
+
+//        //הכפתור של הלחצן מצוקה אביטל
+//        binding.buttonEmergency.setOnClickListener(new View.OnClickListener()
+//        {
+//            @Override
+//            public void onClick(View v)
+//            {
+//                // קוד להפעלת האפקט שאת רוצה להוסיף
+//                animateEmergencyLocation(v);
+//            }
+//        } );
 
 }
