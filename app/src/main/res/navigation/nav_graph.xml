@@ -44,6 +44,10 @@
         <action
             android:id="@+id/action_MapFragment_to_MessagesFragment"
             app:destination="@id/listViewMessagesFragment" />
+
+        <argument
+            android:name="username"
+            app:argType="string" />
     </fragment>
 
     <fragment

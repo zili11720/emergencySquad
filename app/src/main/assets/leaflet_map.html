@@ -9,39 +9,29 @@
     <style>
         #map { height: 100vh; }
     </style>
-
-
     <style>
-        .emergency-marker
-        {
+        .emergency-marker {
             width: 20px;
             height: 20px;
             background-color: red;
             border-radius: 50%;
             animation: pulse 1s infinite;
-
             position: absolute;
             transform: translate(-50%, -50%);
-
         }
-
-        @keyframes pulse
-        {
+        @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.2); }
             100% { transform: scale(1); }
         }
     </style>
-
-
-
 </head>
 <body>
 <div id="map"></div>
 <script>
     var map;
 
-    function initMap(latitude, longitude, locations) {
+    function initMap(latitude, longitude, locations, username) {
         map = L.map('map').setView([latitude, longitude], 19);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -57,7 +47,7 @@
         });
 
         L.marker([latitude, longitude], { icon: customIcon }).addTo(map)
-            .bindPopup("Me")
+            .bindPopup(username)
             .openPopup();
 
         // Add multiple locations
@@ -67,7 +57,7 @@
         });
     }
 
-    function updateMapLocation(latitude, longitude, locations) {
+    function updateMapLocation(latitude, longitude, locations, username) {
         if (map) {
             map.setView([latitude, longitude], 19);
             // Update markers for multiple locations
@@ -76,17 +66,14 @@
                     .bindPopup("Location: " + location[0] + ", " + location[1]);
             });
         } else {
-            initMap(latitude, longitude, locations);
+            initMap(latitude, longitude, locations, username);
         }
     }
 
-    function updateEmergencyLocation(latitude,longitude)
-    {
-         var emergencyMarker=L.divIcon({className:'emergency-marker'});
-         var marker=L.marker([latitude,longitude],{icon:emergencyMarker}).addTo(map);
+    function updateEmergencyLocation(latitude, longitude) {
+        var emergencyMarker = L.divIcon({ className: 'emergency-marker' });
+        var marker = L.marker([latitude, longitude], { icon: emergencyMarker }).addTo(map);
     }
-
-
 </script>
 </body>
 </html>
