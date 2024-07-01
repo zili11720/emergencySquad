@@ -171,7 +171,7 @@ public class MapFragment extends Fragment {
     }
 
     private void playSound(Context context) {
-        MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.alert); // Replace 'my_sound' with your actual sound file name without extension
+        MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.bird); // Replace 'my_sound' with your actual sound file name without extension
         mediaPlayer.start();
     }
 
