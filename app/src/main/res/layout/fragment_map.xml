@@ -27,11 +27,23 @@
             android:id="@+id/button_emergency"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:backgroundTint="#102820"
             android:text="@string/emergency_button"
+            android:textColor="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/buttonPhone"
+            app:layout_constraintTop_toBottomOf="@id/mapview" />
+
+        <Button
+            android:id="@+id/button_cancel_emergency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel_emergency"
             android:backgroundTint="#102820"
             android:textColor="@android:color/white"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@id/buttonPhone"
+            app:layout_constraintStart_toEndOf="@id/button_emergency"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/mapview" />
 

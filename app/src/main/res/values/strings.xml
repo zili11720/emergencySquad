@@ -15,6 +15,9 @@
     <string name="password">password</string>
     <string name="sign_in">Sign in</string>
     <string name="emergency_button">Emergency</string>
+    <string name="call_control">Call control</string>
+    <string name="watch_messages">Watch messages</string>
+    <string name="cancel_emergency">cancel emergency</string>
 
     #texts
     <string name="welcome_to_control_screen">Welcome to control screen</string>
@@ -32,8 +35,7 @@
     <string name="phone_number_text">Phone Number</string>
     <string name="Address_text">Address</string>
     <string name="Special_role_text">Role</string>
-    <string name="call_control">Call control</string>
-    <string name="watch_messages">Watch messages</string>
+
 
 
 </resources>

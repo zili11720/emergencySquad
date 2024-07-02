@@ -109,20 +109,67 @@ public class MapFragment extends Fragment {
             loadMap();
         }
 
-        //הוספת מאזין לכפתור החירום לשליחת המיקום לשרת
         binding.buttonEmergency.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                //new SendEmergencyLocationTask().execute(latitude, longitude, "username"); // החלף בזיהוי המשתמש שלך
-                animateEmergencyLocation(v); // הפעלת הפונקציה להבהוב הנקודה על המפה
+                sendEmergencyRequest(username);
             }
         });
 
     }
 
-    // Phone Permission
+    @SuppressLint("StaticFieldLeak")
+    public void sendEmergencyRequest(String username) {
+        new AsyncTask<String, Void, String>() {
+            @Override
+            protected String doInBackground(String... params) {
+                String response = "";
+                HttpURLConnection urlConnection = null;
+                try {
+                    URL url = new URL(BASE_URL + "/isdangertrue?user_name=" + params[0]);
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection.setRequestMethod("PUT");
+                    urlConnection.setRequestProperty("Content-Type", "application/json");
+                    urlConnection.setDoOutput(true);
+
+                    OutputStream os = urlConnection.getOutputStream();
+                    os.write("".getBytes("UTF-8"));
+                    os.close();
+
+                    int responseCode = urlConnection.getResponseCode();
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                        String inputLine;
+                        StringBuilder responseBuffer = new StringBuilder();
+                        while ((inputLine = in.readLine()) != null) {
+                            responseBuffer.append(inputLine);
+                        }
+                        in.close();
+                        response = responseBuffer.toString();
+                    } else {
+                        response = "Error: " + responseCode;
+                    }
+                } catch (Exception e) {
+                    response = "Exception: " + e.getMessage();
+                } finally {
+                    if (urlConnection != null) {
+                        urlConnection.disconnect();
+                    }
+                }
+                return response;
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+                // Handle the response here if needed
+                Log.d(TAG, "Response from server: " + result);
+            }
+        }.execute(username);
+    }
+
+    // Phone ----------------------------------------------------------
     private void requestPhonePermission() {
         if (ActivityCompat.checkSelfPermission(requireActivity(),
                 Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
@@ -159,7 +206,7 @@ public class MapFragment extends Fragment {
         }
     }
 
-    // Locations
+    // Locations-------------------------------------------------------------------
     @SuppressLint("SetJavaScriptEnabled")
     private void loadMap() {
         WebSettings webSettings = webView.getSettings();
@@ -235,24 +282,6 @@ public class MapFragment extends Fragment {
         return json.toString();
     }
 
-    // Sound
-    private void checkProximityAndPlaySound(Context context, double currentLatitude, double currentLongitude, List<double[]> locations) {
-        final float[] distance = new float[1];
-        for (double[] location : locations) {
-            Location.distanceBetween(currentLatitude, currentLongitude, location[0], location[1], distance);
-            if (distance[0] <= 50) { // If within 50 meters
-                playSound(context);
-                break; // Play sound once if any location is within 50 meters
-            }
-        }
-    }
-
-    private void playSound(Context context) {
-        MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.bird); // Replace 'my_sound' with your actual sound file name without extension
-        mediaPlayer.start();
-    }
-
-    // Server
     private void sendLocationToServer(double latitude, double longitude, String username) {
         new SendLocationTask().execute(latitude, longitude, username);
     }
@@ -351,11 +380,26 @@ public class MapFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
+    // Sound-------------------------------------------------------------------------------
+    private void checkProximityAndPlaySound(Context context, double currentLatitude, double currentLongitude, List<double[]> locations) {
+        final float[] distance = new float[1];
+        for (double[] location : locations) {
+            Location.distanceBetween(currentLatitude, currentLongitude, location[0], location[1], distance);
+            if (distance[0] <= 50) { // If within 50 meters
+                playSound(context);
+                break; // Play sound once if any location is within 50 meters
+            }
+        }
     }
+
+    private void playSound(Context context) {
+        MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.bird); // Replace 'my_sound' with your actual sound file name without extension
+        mediaPlayer.start();
+    }
+
+
+    //emergency----------------------------------------------------------------
+
     // פונקציה שתגרום לנקודה במפה להבהב ברגע שמופעל לחצן מצוקה
     public void animateEmergencyLocation(View v) {
         String jsCode = "javascript:updateEmergencyLocation(" + latitude + ", " + longitude + ")";
@@ -363,64 +407,129 @@ public class MapFragment extends Fragment {
     }
 
 
-    // מחלקה לשליחת מיקום המשתמש לשרת
-    private class SendEmergencyLocationTask extends AsyncTask<Object, Void, Boolean> {
-        private static final String SEND_LOCATION_URL = BASE_URL + "/isdanger/";
+//    // מחלקה לשליחת מיקום המשתמש לשרת
+//    private class SendEmergencyLocationTask extends AsyncTask<Object, Void, Boolean> {
+//        private static final String SEND_LOCATION_URL = BASE_URL + "/isdanger/";
+//
+//        @Override
+//        protected Boolean doInBackground(Object... params) {
+//            double latitude = (double) params[0];
+//            double longitude = (double) params[1];
+//            String userId = (String) params[2];
+//
+//            try {
+//                URL url = new URL(SEND_LOCATION_URL);
+//                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//                conn.setRequestMethod("POST");
+//                conn.setRequestProperty("Content-Type", "application/json; utf-8");
+//                conn.setRequestProperty("Accept", "application/json");
+//                conn.setDoOutput(true);
+//
+//                JSONObject jsonInput = new JSONObject();
+//                jsonInput.put("userId", userId);
+//                jsonInput.put("latitude", latitude);
+//                jsonInput.put("longitude", longitude);
+//                String jsonInputString = jsonInput.toString();
+//
+//                try (OutputStream os = conn.getOutputStream()) {
+//                    byte[] input = jsonInputString.getBytes("utf-8");
+//                    os.write(input, 0, input.length);
+//                }
+//
+//                int responseCode = conn.getResponseCode();
+//                if (responseCode == HttpURLConnection.HTTP_OK) {
+//                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+//                    StringBuilder response = new StringBuilder();
+//                    String inputLine;
+//                    while ((inputLine = in.readLine()) != null) {
+//                        response.append(inputLine.trim());
+//                    }
+//                    in.close();
+//
+//                    JSONObject jsonResponse = new JSONObject(response.toString());
+//                    return jsonResponse.has("status") && jsonResponse.getString("status").equals("success");
+//                } else {
+//                    return false;
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//                return false;
+//            }
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Boolean success) {
+//            if (success) {
+//                Log.d(TAG, "Emergency location sent successfully");
+//            } else {
+//                Log.d(TAG, "Failed to send emergency location");
+//            }
+//        }
+//
+//    }
+private void createMeetingWithAverageLocation() {
+    new CreateMeetingTask().execute();
+}
+    // מראה נקודת אמצע בין כל המיקומים על המפה עם אייקון שונה
+    private class CreateMeetingTask extends AsyncTask<Void, Void, double[]> {
+        private static final String GET_MEETING_URL = BASE_URL + "/get-meeting/";
 
         @Override
-        protected Boolean doInBackground(Object... params) {
-            double latitude = (double) params[0];
-            double longitude = (double) params[1];
-            String userId = (String) params[2];
-
+        protected double[] doInBackground(Void... voids) {
             try {
-                URL url = new URL(SEND_LOCATION_URL);
+                URL url = new URL(GET_MEETING_URL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json; utf-8");
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setDoOutput(true);
-
-                JSONObject jsonInput = new JSONObject();
-                jsonInput.put("userId", userId);
-                jsonInput.put("latitude", latitude);
-                jsonInput.put("longitude", longitude);
-                String jsonInputString = jsonInput.toString();
-
-                try (OutputStream os = conn.getOutputStream()) {
-                    byte[] input = jsonInputString.getBytes("utf-8");
-                    os.write(input, 0, input.length);
-                }
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
 
                 int responseCode = conn.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK) {
-                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
-                    StringBuilder response = new StringBuilder();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     String inputLine;
+                    StringBuilder response = new StringBuilder();
+
                     while ((inputLine = in.readLine()) != null) {
-                        response.append(inputLine.trim());
+                        response.append(inputLine);
                     }
                     in.close();
 
                     JSONObject jsonResponse = new JSONObject(response.toString());
-                    return jsonResponse.has("status") && jsonResponse.getString("status").equals("success");
+                    double latitude = jsonResponse.getDouble("latitude");
+                    double longitude = jsonResponse.getDouble("longitude");
+
+                    return new double[]{latitude, longitude};
                 } else {
-                    return false;
+                    Log.d(TAG, "Failed to get meeting location. Response code: " + responseCode);
                 }
+                conn.disconnect();
             } catch (Exception e) {
-                e.printStackTrace();
-                return false;
+                Log.e(TAG, "Error getting meeting location", e);
             }
+            return null;
         }
 
         @Override
-        protected void onPostExecute(Boolean success) {
-            if (success) {
-                Log.d(TAG, "Emergency location sent successfully");
+        protected void onPostExecute(double[] averageLocation) {
+            if (averageLocation != null) {
+                Log.d(TAG, "Average location: Latitude " + averageLocation[0] + ", Longitude " + averageLocation[1]);
+                // Update the map with the average location and add special icon
+                loadMapWithLocation(averageLocation[0], averageLocation[1], locations, username);
+                updateAverageLocationOnMap(averageLocation[0], averageLocation[1]);
             } else {
-                Log.d(TAG, "Failed to send emergency location");
+                Log.d(TAG, "Failed to get average location from server");
             }
         }
     }
 
+    private void updateAverageLocationOnMap(double latitude, double longitude) {
+        String jsCode = "javascript:updateAverageLocation(" + latitude + ", " + longitude + ")";
+        webView.evaluateJavascript(jsCode, null);
+    }
+
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
 }
