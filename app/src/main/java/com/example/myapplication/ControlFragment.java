@@ -27,11 +27,18 @@ public class ControlFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @NonNull Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+
+        Bundle bundle = getArguments();
+
+        if (bundle != null) {
+            String username = bundle.getString("username", "defaultUser"); // Default to "defaultUser" if username is not found
+        }
+
         binding.btnMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 NavHostFragment.findNavController(ControlFragment.this)
-                        .navigate(R.id.action_ControlFragment_to_MapFragment);
+                        .navigate(R.id.action_ControlFragment_to_MapFragment,bundle);
             }
         });
 
