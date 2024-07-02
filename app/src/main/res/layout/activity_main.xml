@@ -26,5 +26,19 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <include layout="@layout/content_main" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="16dp">
+
+        <Button
+            android:id="@+id/authenticateButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Authenticate" />
+
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
