@@ -49,6 +49,14 @@ public class ControlFragment extends Fragment {
                         .navigate(R.id.action_ControlFragment_to_TeamFragment);
             }
         });
+        binding.setAMeeting.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //אילה זה הכפתור שלך
+            }
+        });
+
+
     }
 
     @Override

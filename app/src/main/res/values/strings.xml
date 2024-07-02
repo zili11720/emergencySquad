@@ -35,7 +35,7 @@
     <string name="phone_number_text">Phone Number</string>
     <string name="Address_text">Address</string>
     <string name="Special_role_text">Role</string>
-
+    <string name="set_a_meeting">set a meeting</string>
 
 
 </resources>
