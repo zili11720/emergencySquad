@@ -56,6 +56,7 @@ public class MapFragment extends Fragment {
     private static final int REQUEST_PHONE_PERMISSION = 2;
     private static final String BASE_URL = "https://app.the-safe-zone.online";
 
+    //list of locations
     private List<LocationData> locations = new ArrayList<>();
 
     @Override
