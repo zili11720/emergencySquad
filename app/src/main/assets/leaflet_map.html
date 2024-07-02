@@ -36,6 +36,12 @@
         iconAnchor: [22, 94],
         popupAnchor: [-3, -76]
     });
+        var averageLocationIcon = L.icon({
+        iconUrl: 'file:///android_asset/location-icon2.png', // Path to your special icon
+        iconSize: [38, 38], // Size of the icon
+        iconAnchor: [19, 19], // Point of the icon which will correspond to marker's location
+        popupAnchor: [0, -19] // Point from which the popup should open relative to the iconAnchor
+    });
 
     function initMap(latitude, longitude, locations, username) {
         map = L.map('map').setView([latitude, longitude], 19);
@@ -83,6 +89,14 @@
         var emergencyMarker = L.divIcon({ className: 'emergency-marker' });
         var marker = L.marker([latitude, longitude], { icon: emergencyMarker }).addTo(map);
     }
+    function updateAverageLocation(latitude, longitude) {
+    if (map) {
+        var averageMarker = L.marker([latitude, longitude], { icon: averageLocationIcon }).addTo(map)
+            .bindPopup("Average Location")
+            .openPopup();
+    }
+}
+
 </script>
 </body>
 </html>
