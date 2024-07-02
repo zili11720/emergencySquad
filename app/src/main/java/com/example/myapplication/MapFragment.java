@@ -1,3 +1,4 @@
+
 package com.example.myapplication;
 
 import android.Manifest;
@@ -52,6 +53,7 @@ public class MapFragment extends Fragment {
     private double lastLongitude = Double.NaN;
     String username = "";
     private static final int REQUEST_PHONE_PERMISSION = 2;
+    private static final String BASE_URL = "https://app.the-safe-zone.online";
 
     private List<double[]> locations = new ArrayList<>();
 
@@ -106,6 +108,18 @@ public class MapFragment extends Fragment {
         } else {
             loadMap();
         }
+
+        //הוספת מאזין לכפתור החירום לשליחת המיקום לשרת
+        binding.buttonEmergency.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                //new SendEmergencyLocationTask().execute(latitude, longitude, "username"); // החלף בזיהוי המשתמש שלך
+                animateEmergencyLocation(v); // הפעלת הפונקציה להבהוב הנקודה על המפה
+            }
+        });
+
     }
 
     // Phone Permission
@@ -146,6 +160,7 @@ public class MapFragment extends Fragment {
     }
 
     // Locations
+    @SuppressLint("SetJavaScriptEnabled")
     private void loadMap() {
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -169,7 +184,8 @@ public class MapFragment extends Fragment {
 
     private void getLastLocation(String username) {
         if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                && ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
             return;
         }
         fusedLocationClient.getLastLocation()
@@ -340,4 +356,71 @@ public class MapFragment extends Fragment {
         super.onDestroyView();
         binding = null;
     }
+    // פונקציה שתגרום לנקודה במפה להבהב ברגע שמופעל לחצן מצוקה
+    public void animateEmergencyLocation(View v) {
+        String jsCode = "javascript:updateEmergencyLocation(" + latitude + ", " + longitude + ")";
+        webView.evaluateJavascript(jsCode, null);
+    }
+
+
+    // מחלקה לשליחת מיקום המשתמש לשרת
+    private class SendEmergencyLocationTask extends AsyncTask<Object, Void, Boolean> {
+        private static final String SEND_LOCATION_URL = BASE_URL + "/isdanger/";
+
+        @Override
+        protected Boolean doInBackground(Object... params) {
+            double latitude = (double) params[0];
+            double longitude = (double) params[1];
+            String userId = (String) params[2];
+
+            try {
+                URL url = new URL(SEND_LOCATION_URL);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json; utf-8");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setDoOutput(true);
+
+                JSONObject jsonInput = new JSONObject();
+                jsonInput.put("userId", userId);
+                jsonInput.put("latitude", latitude);
+                jsonInput.put("longitude", longitude);
+                String jsonInputString = jsonInput.toString();
+
+                try (OutputStream os = conn.getOutputStream()) {
+                    byte[] input = jsonInputString.getBytes("utf-8");
+                    os.write(input, 0, input.length);
+                }
+
+                int responseCode = conn.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+                    StringBuilder response = new StringBuilder();
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine.trim());
+                    }
+                    in.close();
+
+                    JSONObject jsonResponse = new JSONObject(response.toString());
+                    return jsonResponse.has("status") && jsonResponse.getString("status").equals("success");
+                } else {
+                    return false;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            if (success) {
+                Log.d(TAG, "Emergency location sent successfully");
+            } else {
+                Log.d(TAG, "Failed to send emergency location");
+            }
+        }
+    }
+
 }
