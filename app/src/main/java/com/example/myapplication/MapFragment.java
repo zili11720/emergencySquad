@@ -52,10 +52,11 @@ public class MapFragment extends Fragment {
     private double lastLatitude = Double.NaN;
     private double lastLongitude = Double.NaN;
     String username = "";
+    String adminPhoneNumber="";
     private static final int REQUEST_PHONE_PERMISSION = 2;
     private static final String BASE_URL = "https://app.the-safe-zone.online";
 
-    private List<double[]> locations = new ArrayList<>();
+    private List<LocationData> locations = new ArrayList<>();
 
     @Override
     public View onCreateView(
@@ -112,61 +113,21 @@ public class MapFragment extends Fragment {
         binding.buttonEmergency.setOnClickListener(new View.OnClickListener()
         {
             @Override
-            public void onClick(View v)
-            {
-                sendEmergencyRequest(username);
+            public void onClick(View v) {
+                new SendEmergencyRequestTask().execute(username);
             }
         });
 
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    public void sendEmergencyRequest(String username) {
-        new AsyncTask<String, Void, String>() {
+        binding.buttonCancelEmergency.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            protected String doInBackground(String... params) {
-                String response = "";
-                HttpURLConnection urlConnection = null;
-                try {
-                    URL url = new URL(BASE_URL + "/isdangertrue?user_name=" + params[0]);
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setRequestMethod("PUT");
-                    urlConnection.setRequestProperty("Content-Type", "application/json");
-                    urlConnection.setDoOutput(true);
-
-                    OutputStream os = urlConnection.getOutputStream();
-                    os.write("".getBytes("UTF-8"));
-                    os.close();
-
-                    int responseCode = urlConnection.getResponseCode();
-                    if (responseCode == HttpURLConnection.HTTP_OK) {
-                        BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                        String inputLine;
-                        StringBuilder responseBuffer = new StringBuilder();
-                        while ((inputLine = in.readLine()) != null) {
-                            responseBuffer.append(inputLine);
-                        }
-                        in.close();
-                        response = responseBuffer.toString();
-                    } else {
-                        response = "Error: " + responseCode;
-                    }
-                } catch (Exception e) {
-                    response = "Exception: " + e.getMessage();
-                } finally {
-                    if (urlConnection != null) {
-                        urlConnection.disconnect();
-                    }
-                }
-                return response;
+            public void onClick(View v) {
+                new SendCancelEmergencyRequestTask().execute(username);
             }
+        });
 
-            @Override
-            protected void onPostExecute(String result) {
-                // Handle the response here if needed
-                Log.d(TAG, "Response from server: " + result);
-            }
-        }.execute(username);
+        new GetAdminPhoneTask().execute();
+
     }
 
     // Phone ----------------------------------------------------------
@@ -194,9 +155,8 @@ public class MapFragment extends Fragment {
     }
 
     public void onPhoneButtonClick(View view) {
-        String phoneNumber = "0587300206"; // Replace with your desired phone number
         Intent intent = new Intent(Intent.ACTION_CALL);
-        intent.setData(Uri.parse("tel:" + phoneNumber));
+        intent.setData(Uri.parse("tel:" +adminPhoneNumber));
 
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
             startActivity(intent);
@@ -206,8 +166,78 @@ public class MapFragment extends Fragment {
         }
     }
 
+    private class GetAdminPhoneTask extends AsyncTask<Void, Void, String> {
+        private static final String ADMIN_PHONE_URL = BASE_URL + "/admin-phone/";
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            String response = "";
+            HttpURLConnection urlConnection = null;
+            try {
+                URL url = new URL(ADMIN_PHONE_URL);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+
+                int responseCode = urlConnection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                    String inputLine;
+                    StringBuilder responseBuffer = new StringBuilder();
+                    while ((inputLine = in.readLine()) != null) {
+                        responseBuffer.append(inputLine);
+                    }
+                    in.close();
+                    response = responseBuffer.toString();
+                } else {
+                    response = "Error: " + responseCode;
+                }
+            } catch (Exception e) {
+                response = "Exception: " + e.getMessage();
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+            }
+            return response;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.d(TAG, "Admin phone number: " + result);
+            adminPhoneNumber = result; // Store the phone number in the member variable
+            // Handle the response here if needed, e.g., update UI
+        }
+    }
+
     // Locations-------------------------------------------------------------------
-    @SuppressLint("SetJavaScriptEnabled")
+
+
+    // new class
+    public static class LocationData {
+        private double latitude;
+        private double longitude;
+        private String username;
+
+        public LocationData(double latitude, double longitude, String username) {
+            this.latitude = latitude;
+            this.longitude = longitude;
+            this.username = username;
+        }
+
+        public double getLatitude() {
+            return latitude;
+        }
+
+        public double getLongitude() {
+            return longitude;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+    }
+        @SuppressLint("SetJavaScriptEnabled")
     private void loadMap() {
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -264,16 +294,17 @@ public class MapFragment extends Fragment {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private void loadMapWithLocation(double latitude, double longitude, List<double[]> locations, String username) {
+    private void loadMapWithLocation(double latitude, double longitude, List<LocationData> locations, String username) {
         String jsCode = "javascript:updateMapLocation(" + latitude + ", " + longitude + ", " + locationsToJson(locations) + ", '" + username + "')";
         webView.evaluateJavascript(jsCode, null);
     }
 
-    private String locationsToJson(List<double[]> locations) {
+
+    private String locationsToJson(List<LocationData> locations) {
         StringBuilder json = new StringBuilder("[");
         for (int i = 0; i < locations.size(); i++) {
-            double[] loc = locations.get(i);
-            json.append("[").append(loc[0]).append(", ").append(loc[1]).append("]");
+            LocationData loc = locations.get(i);
+            json.append("[").append(loc.getLatitude()).append(", ").append(loc.getLongitude()).append(", '").append(loc.getUsername()).append("']");
             if (i < locations.size() - 1) {
                 json.append(", ");
             }
@@ -281,6 +312,7 @@ public class MapFragment extends Fragment {
         json.append("]");
         return json.toString();
     }
+
 
     private void sendLocationToServer(double latitude, double longitude, String username) {
         new SendLocationTask().execute(latitude, longitude, username);
@@ -326,10 +358,10 @@ public class MapFragment extends Fragment {
         new FetchLocationsTask().execute();
     }
 
-    private class FetchLocationsTask extends AsyncTask<Void, Void, List<double[]>> {
+    private class FetchLocationsTask extends AsyncTask<Void, Void, List<LocationData>> {
         @Override
-        protected List<double[]> doInBackground(Void... voids) {
-            List<double[]> locations = new ArrayList<>();
+        protected List<LocationData> doInBackground(Void... voids) {
+            List<LocationData> locations = new ArrayList<>();
             try {
                 URL url = new URL("https://app.the-safe-zone.online/get-locations");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -352,11 +384,11 @@ public class MapFragment extends Fragment {
 
                         double lat = jsonObject.getDouble("latitude");
                         double lon = jsonObject.getDouble("longitude");
-                        locations.add(new double[]{lat, lon});
+                        String username = jsonObject.getString("username");
+                        locations.add(new LocationData(lat, lon, username));
                     }
 
                 } else {
-
                     Log.d(TAG, "Failed to fetch locations. Response code: " + responseCode);
                 }
                 conn.disconnect();
@@ -367,7 +399,7 @@ public class MapFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(List<double[]> fetchedLocations) {
+        protected void onPostExecute(List<LocationData> fetchedLocations) {
             super.onPostExecute(fetchedLocations);
             if (fetchedLocations != null) {
                 locations.clear();
@@ -381,24 +413,128 @@ public class MapFragment extends Fragment {
     }
 
     // Sound-------------------------------------------------------------------------------
-    private void checkProximityAndPlaySound(Context context, double currentLatitude, double currentLongitude, List<double[]> locations) {
+    private void checkProximityAndPlaySound(Context context, double currentLatitude, double currentLongitude, List<LocationData> locations) {
         final float[] distance = new float[1];
-        for (double[] location : locations) {
-            Location.distanceBetween(currentLatitude, currentLongitude, location[0], location[1], distance);
-            if (distance[0] <= 50) { // If within 50 meters
-                playSound(context);
-                break; // Play sound once if any location is within 50 meters
+        for (LocationData location : locations)
+            if(location.latitude!=latitude && location.longitude != longitude && location.username != username)
+            {
+                Location.distanceBetween(currentLatitude, currentLongitude, location.getLatitude(), location.getLongitude(), distance);
+                if (distance[0] <= 50) { // If within 50 meters
+                    playSound(context);
+                    break; // Play sound once if any location is within 50 meters
+                }
             }
-        }
     }
 
+
     private void playSound(Context context) {
-        MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.bird); // Replace 'my_sound' with your actual sound file name without extension
+        MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.bird);
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mp.release();
+            }
+        });
         mediaPlayer.start();
     }
 
+    //emergency--------------------------------------------------------------------------------------
 
-    //emergency----------------------------------------------------------------
+    private class SendCancelEmergencyRequestTask extends AsyncTask<String, Void, String> {
+        private static final String EMERGENCY_URL = BASE_URL + "/isdangerfalse?user_name=";
+
+        @Override
+        protected String doInBackground(String... params) {
+            String response = "";
+            HttpURLConnection urlConnection = null;
+            try {
+                URL url = new URL(EMERGENCY_URL + params[0]);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("PUT");
+                urlConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                urlConnection.setDoOutput(true);
+
+                OutputStream os = urlConnection.getOutputStream();
+                os.write("".getBytes("UTF-8"));
+                os.close();
+
+                int responseCode = urlConnection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                    String inputLine;
+                    StringBuilder responseBuffer = new StringBuilder();
+                    while ((inputLine = in.readLine()) != null) {
+                        responseBuffer.append(inputLine);
+                    }
+                    in.close();
+                    response = responseBuffer.toString();
+                } else {
+                    response = "Error: " + responseCode;
+                }
+            } catch (Exception e) {
+                response = "Exception: " + e.getMessage();
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+            }
+            return response;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.d(TAG, "Response from server: " + result);
+            // Handle the response here if needed
+        }
+    }
+
+    private class SendEmergencyRequestTask extends AsyncTask<String, Void, String> {
+        private static final String EMERGENCY_URL = BASE_URL + "/isdangertrue?user_name=";
+
+        @Override
+        protected String doInBackground(String... params) {
+            String response = "";
+            HttpURLConnection urlConnection = null;
+            try {
+                URL url = new URL(EMERGENCY_URL + params[0]);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("PUT");
+                urlConnection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                urlConnection.setDoOutput(true);
+
+                OutputStream os = urlConnection.getOutputStream();
+                os.write("".getBytes("UTF-8"));
+                os.close();
+
+                int responseCode = urlConnection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                    String inputLine;
+                    StringBuilder responseBuffer = new StringBuilder();
+                    while ((inputLine = in.readLine()) != null) {
+                        responseBuffer.append(inputLine);
+                    }
+                    in.close();
+                    response = responseBuffer.toString();
+                } else {
+                    response = "Error: " + responseCode;
+                }
+            } catch (Exception e) {
+                response = "Exception: " + e.getMessage();
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+            }
+            return response;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.d(TAG, "Response from server: " + result);
+            // Handle the response here if needed
+        }
+    }
 
     // פונקציה שתגרום לנקודה במפה להבהב ברגע שמופעל לחצן מצוקה
     public void animateEmergencyLocation(View v) {
@@ -467,6 +603,8 @@ public class MapFragment extends Fragment {
 //        }
 //
 //    }
+
+//meeting---------------------------------------------------------------
 private void createMeetingWithAverageLocation() {
     new CreateMeetingTask().execute();
 }
