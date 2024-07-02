@@ -417,7 +417,7 @@ public class MapFragment extends Fragment {
     private void checkProximityAndPlaySound(Context context, double currentLatitude, double currentLongitude, List<LocationData> locations) {
         final float[] distance = new float[1];
         for (LocationData location : locations)
-            if(location.latitude!=latitude && location.longitude != longitude && location.username != username)
+            if(!location.username.equals( username))
             {
                 Location.distanceBetween(currentLatitude, currentLongitude, location.getLatitude(), location.getLongitude(), distance);
                 if (distance[0] <= 50) { // If within 50 meters

@@ -56,11 +56,10 @@
             .bindPopup(username)
             .openPopup();
 
-
         // Add multiple locations
         locations.forEach(function(location) {
             L.marker([location[0], location[1]], { icon: customIcon }).addTo(map)
-                .bindPopup(location[2]); // Show username and coordinates
+                .bindPopup(location[2]); // Show username
         });
     }
 
@@ -80,7 +79,7 @@
             // Update markers for multiple locations
             locations.forEach(function(location) {
                 L.marker([location[0], location[1]], { icon: customIcon }).addTo(map)
-                    .bindPopup(location[2] + ": " + location[0] + ", " + location[1]); // Show username and coordinates
+                    .bindPopup(location[2]); // Show username and coordinates
             });
         } else {
             initMap(latitude, longitude, locations, username);
