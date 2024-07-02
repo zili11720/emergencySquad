@@ -81,7 +81,7 @@ public class MapFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 NavHostFragment.findNavController(MapFragment.this)
-                        .navigate(R.id.action_MapFragment_to_MessagesFragment);
+                        .navigate(R.id.action_MapFragment_to_MessagesFragment,bundle);
             }
         });
         binding.buttonPhone.setOnClickListener(new View.OnClickListener() {

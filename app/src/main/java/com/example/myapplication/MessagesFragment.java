@@ -36,12 +36,20 @@ public class MessagesFragment extends Fragment {
     public MessagesFragment() {
         // Required empty public constructor
     }
+    String username="";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_messages, container, false);
+
+        // Retrieve the username from the bundle
+        Bundle bundle = getArguments();
+
+        if (bundle != null) {
+            username = bundle.getString("username", "defaultUser"); // Default to "defaultUser" if username is not found
+        }
 
         // Initialize views
         listViewMessages = view.findViewById(R.id.listViewMessages);
@@ -59,7 +67,7 @@ public class MessagesFragment extends Fragment {
             public void onClick(View v) {
                 // Get the message text, user name, and current timestamp
                 String message = editTextMessage.getText().toString();
-                String userName = getUserName(); // Function to get the username
+                String userName = username;//get the username
                 String timestamp = getCurrentTimestamp(); // Function to get the current timestamp
 
                 // Check if the message is not empty
@@ -87,10 +95,6 @@ public class MessagesFragment extends Fragment {
         fetchMessages();
     }
 
-    // Function to get the username (could be retrieved from SharedPreferences or other sources)
-    private String getUserName() {
-        return "exampleUserName";
-    }
 
     // Function to get the current timestamp in the desired format
     private String getCurrentTimestamp() {

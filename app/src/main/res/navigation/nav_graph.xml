@@ -67,7 +67,11 @@
         android:id="@+id/NewTeamFragment"
         android:name="com.example.myapplication.NewTeamFragment"
         android:label="New Team"
-        tools:layout="@layout/fragment_new_team" />
+        tools:layout="@layout/fragment_new_team" >
+        <action
+            android:id="@+id/action_NewTeamFragment_to_NewMemberFragment"
+            app:destination="@id/NewMemberFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/NewMemberFragment"
@@ -80,5 +84,6 @@
         android:name="com.example.myapplication.MessagesFragment"
         android:label="messages"
         tools:layout="@layout/fragment_messages" />
+
 
 </navigation>

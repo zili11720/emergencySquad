@@ -5,10 +5,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -16,6 +18,9 @@ import androidx.fragment.app.Fragment;
  * create an instance of this fragment.
  */
 public class NewTeamFragment extends Fragment {
+
+    private String groupNumber;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -23,19 +28,23 @@ public class NewTeamFragment extends Fragment {
 
         Button enterManagerDetailsButton = view.findViewById(R.id.enterManagerDetailsButton);
         Button createButton = view.findViewById(R.id.createButton);
+        EditText groupNumberInput = view.findViewById(R.id.groupNumberInput);
 
-        // כרגע הכפתור לא מבצע שום פעולה
         enterManagerDetailsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // פעולה שתתבצע בעת לחיצה על הכפתור
+                NavHostFragment.findNavController(NewTeamFragment.this)
+                        .navigate(R.id.action_NewTeamFragment_to_NewMemberFragment);
+                //לסמן כמנהל
             }
         });
 
         createButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // פעולה שתתבצע בעת לחיצה על הכפתור
+                groupNumber = groupNumberInput.getText().toString();
+                // Handle the button click, groupNumber variable contains the entered group number
+                //להוסיף לכל אחד שדה עם המספר קבוצה.....
             }
         });
 

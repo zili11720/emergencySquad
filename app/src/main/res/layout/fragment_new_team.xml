@@ -14,24 +14,49 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="32dp"
         android:text="@string/create_new_team"
-
         android:textColor="#102820"
         android:textSize="30sp"
+        android:fontFamily="sans-serif-condensed-medium"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
+    <TextView
+        android:id="@+id/groupNumberLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:fontFamily="sans-serif"
+        android:text="Group Number:"
+        android:textColor="#102820"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textView" />
+
+    <EditText
+        android:id="@+id/groupNumberInput"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="4dp"
+        android:hint="Enter group number"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/groupNumberLabel"
+        app:layout_constraintWidth_default="wrap" />
 
     <Button
         android:id="@+id/enterManagerDetailsButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/enter_manager_details"
+        android:layout_marginTop="16dp"
         android:backgroundTint="#102820"
-        app:layout_constraintTop_toBottomOf="@id/textView"
-        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/enter_manager_details"
         app:layout_constraintEnd_toEndOf="parent"
-        />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/groupNumberInput" />
 
     <Button
         android:id="@+id/createButton"
@@ -42,8 +67,6 @@
         app:layout_constraintTop_toBottomOf="@id/enterManagerDetailsButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintVertical_bias="0.5" />
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
