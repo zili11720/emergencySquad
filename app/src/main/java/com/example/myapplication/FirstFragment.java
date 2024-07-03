@@ -115,9 +115,16 @@ public class FirstFragment extends Fragment {
             public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                 super.onAuthenticationSucceeded(result);
                 Toast.makeText(requireContext(), "Authentication succeeded!", Toast.LENGTH_SHORT).show();
-                // Navigate based on user's role after successful biometric authentication
-                NavHostFragment.findNavController(FirstFragment.this)
-                        .navigate(R.id.action_FirstFragment_to_MapFragment, userBundle);
+
+                // Check the user status from the bundle and navigate accordingly
+                String status = userBundle.getString("status");
+                if ("success_is_admin".equals(status)) {
+                    NavHostFragment.findNavController(FirstFragment.this)
+                            .navigate(R.id.action_FirstFragment_to_ControlFragment, userBundle);
+                } else if ("success_is_not_admin".equals(status)) {
+                    NavHostFragment.findNavController(FirstFragment.this)
+                            .navigate(R.id.action_FirstFragment_to_MapFragment, userBundle);
+                }
             }
 
             @Override
@@ -184,6 +191,10 @@ public class FirstFragment extends Fragment {
 
                     JSONObject jsonResponse = new JSONObject(response.toString());
                     String status = jsonResponse.getString("status");
+
+                    // Put the status in the bundle
+                    bundle.putString("status", status);
+
                     return new Pair<>(true, status);
                 } else {
                     return new Pair<>(false, null);
