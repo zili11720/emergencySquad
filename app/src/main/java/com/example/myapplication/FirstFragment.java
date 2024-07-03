@@ -12,6 +12,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
 
 import com.example.myapplication.databinding.FragmentFirstBinding;
 
@@ -22,11 +26,16 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.Executor;
 
 public class FirstFragment extends Fragment {
 
     private FragmentFirstBinding binding;
     private static final String BASE_URL = "https://app.the-safe-zone.online";
+
+    private BiometricPrompt biometricPrompt;
+    private BiometricPrompt.PromptInfo promptInfo;
+    private Bundle userBundle; // Store user bundle for later use
 
     @Override
     public View onCreateView(
@@ -49,6 +58,9 @@ public class FirstFragment extends Fragment {
             }
         });
 
+        // Set up BiometricPrompt
+        setupBiometricPrompt();
+
         binding.buttonSignIn.setOnClickListener(v -> {
             EditText username = view.findViewById(R.id.edittext_username);
             EditText password = view.findViewById(R.id.edittext_password);
@@ -63,20 +75,79 @@ public class FirstFragment extends Fragment {
                 Bundle bundle = new Bundle();
                 bundle.putString("username", usernameText);
 
+                // Store the bundle for later use in biometric prompt
+                userBundle = bundle;
+
                 // Pass the bundle to the AsyncTask
                 new ValidateUserTask(bundle).execute(usernameText, passwordText);
             }
         });
     }
 
+    private void setupBiometricPrompt() {
+        // Check BiometricManager and show a corresponding Toast
+        BiometricManager biometricManager = BiometricManager.from(requireContext());
+        switch (biometricManager.canAuthenticate()) {
+            case BiometricManager.BIOMETRIC_SUCCESS:
+                //Toast.makeText(requireContext(), "Biometric authentication is available", Toast.LENGTH_SHORT).show();
+                break;
+            case BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE:
+                Toast.makeText(requireContext(), "This device doesn't support biometric authentication", Toast.LENGTH_SHORT).show();
+                break;
+            case BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE:
+                Toast.makeText(requireContext(), "Biometric authentication is currently unavailable", Toast.LENGTH_SHORT).show();
+                break;
+            case BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED:
+                Toast.makeText(requireContext(), "No biometric credentials are enrolled", Toast.LENGTH_SHORT).show();
+                break;
+        }
+
+        // Create BiometricPrompt and configure it
+        Executor executor = ContextCompat.getMainExecutor(requireContext());
+        biometricPrompt = new BiometricPrompt(this, executor, new BiometricPrompt.AuthenticationCallback() {
+            @Override
+            public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                super.onAuthenticationError(errorCode, errString);
+                Toast.makeText(requireContext(), "Authentication error: " + errString, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                super.onAuthenticationSucceeded(result);
+                Toast.makeText(requireContext(), "Authentication succeeded!", Toast.LENGTH_SHORT).show();
+                // Navigate based on user's role after successful biometric authentication
+                NavHostFragment.findNavController(FirstFragment.this)
+                        .navigate(R.id.action_FirstFragment_to_MapFragment, userBundle);
+            }
+
+            @Override
+            public void onAuthenticationFailed() {
+                super.onAuthenticationFailed();
+                Toast.makeText(requireContext(), "Authentication failed", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Configure the PromptInfo for biometric authentication
+        promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Biometric Authentication")
+                .setSubtitle("Log in using your biometric credential")
+                .setNegativeButtonText("Cancel")
+                .build();
+    }
+
+    private void promptBiometricAuthentication() {
+        // Trigger biometric authentication
+        biometricPrompt.authenticate(promptInfo);
+    }
+
     public class ValidateUserTask extends AsyncTask<String, Void, Pair<Boolean, String>> {
         private static final String LOGIN_URL = BASE_URL + "/test-login";
 
         private final Bundle bundle;
+
         public ValidateUserTask(Bundle bundle) {
             this.bundle = bundle;
         }
-
 
         @Override
         protected Pair<Boolean, String> doInBackground(String... params) {
@@ -86,7 +157,7 @@ public class FirstFragment extends Fragment {
             try {
                 URL url = new URL(LOGIN_URL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");  // Change to POST
+                conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json; utf-8");
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setDoOutput(true);
@@ -128,12 +199,8 @@ public class FirstFragment extends Fragment {
             Boolean isValid = result.first;
             String status = result.second;
             if (isValid) {
-                if ("success_is_admin".equals(status)) {
-                    NavHostFragment.findNavController(FirstFragment.this)
-                            .navigate(R.id.action_FirstFragment_to_ControlFragment,bundle);
-                } else if ("success_is_not_admin".equals(status)) {
-                    NavHostFragment.findNavController(FirstFragment.this)
-                            .navigate(R.id.action_FirstFragment_to_MapFragment,bundle);
+                if ("success_is_admin".equals(status) || "success_is_not_admin".equals(status)) {
+                    promptBiometricAuthentication(); // Prompt for biometric authentication if credentials are valid
                 } else {
                     Toast.makeText(getActivity(), "Invalid status returned", Toast.LENGTH_SHORT).show();
                 }

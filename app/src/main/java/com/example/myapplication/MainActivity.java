@@ -48,8 +48,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Runnable noMovementRunnable;
     private static final long NO_MOVEMENT_TIMEOUT = 180000; // 3 minutes timeout
 
-    private BiometricPrompt biometricPrompt;
-    private BiometricPrompt.PromptInfo promptInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,49 +57,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(binding.getRoot());
 
         setSupportActionBar(binding.toolbar);
-
-        BiometricManager biometricManager = BiometricManager.from(this);
-        switch (biometricManager.canAuthenticate()) {
-            case BiometricManager.BIOMETRIC_SUCCESS:
-                Toast.makeText(this, "Biometric authentication is available", Toast.LENGTH_SHORT).show();
-                break;
-            case BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE:
-                Toast.makeText(this, "This device doesn't support biometric authentication", Toast.LENGTH_SHORT).show();
-                break;
-            case BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE:
-                Toast.makeText(this, "Biometric authentication is currently unavailable", Toast.LENGTH_SHORT).show();
-                break;
-            case BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED:
-                Toast.makeText(this, "No biometric credentials are enrolled", Toast.LENGTH_SHORT).show();
-                break;
-        }
-        biometricPrompt = new BiometricPrompt(this, ContextCompat.getMainExecutor(this), new BiometricPrompt.AuthenticationCallback() {
-            @Override
-            public void onAuthenticationError(int errorCode, CharSequence errString) {
-                super.onAuthenticationError(errorCode, errString);
-                Toast.makeText(MainActivity.this, "Authentication error: " + errString, Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
-                super.onAuthenticationSucceeded(result);
-                Toast.makeText(MainActivity.this, "Authentication succeeded!", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onAuthenticationFailed() {
-                super.onAuthenticationFailed();
-                Toast.makeText(MainActivity.this, "Authentication failed", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        promptInfo = new BiometricPrompt.PromptInfo.Builder()
-                .setTitle("Biometric Authentication")
-                .setSubtitle("Log in using your biometric credential")
-                .setNegativeButtonText("Cancel")
-                .build();
-
-        findViewById(R.id.authenticateButton).setOnClickListener(v -> biometricPrompt.authenticate(promptInfo));
 
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
