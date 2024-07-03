@@ -77,6 +77,7 @@ public class FirstFragment extends Fragment {
             this.bundle = bundle;
         }
 
+
         @Override
         protected Pair<Boolean, String> doInBackground(String... params) {
             String username = params[0];

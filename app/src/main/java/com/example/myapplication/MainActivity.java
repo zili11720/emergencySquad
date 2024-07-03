@@ -140,6 +140,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             return true;
         }
 
+
         return super.onOptionsItemSelected(item);
     }
 
