@@ -51,6 +51,9 @@ public class MapFragment extends Fragment {
     private double longitude;
     private double lastLatitude = Double.NaN;
     private double lastLongitude = Double.NaN;
+    private double latitudeMeet;
+    private double longitudeMeet;
+
     String username = "";
     String adminPhoneNumber="";
     private static final int REQUEST_PHONE_PERMISSION = 2;
@@ -74,18 +77,37 @@ public class MapFragment extends Fragment {
 
         // Retrieve the username from the bundle
         Bundle bundle = getArguments();
-
         if (bundle != null) {
             username = bundle.getString("username", "defaultUser"); // Default to "defaultUser" if username is not found
+            latitudeMeet = bundle.getDouble("latitudeMeet", 0.0);
+            longitudeMeet = bundle.getDouble("longitudeMeet", 0.0);
+
         }
+
+        webView = binding.mapview;
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                // Call the JavaScript function after the page has loaded
+                if (latitudeMeet != 0.0 && longitudeMeet != 0.0) {
+                    webView.evaluateJavascript("updateAverageLocation(" + latitudeMeet + ", " + longitudeMeet + ");", null);
+                }
+            }
+        });
+
+
+
 
         binding.buttonMessages.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 NavHostFragment.findNavController(MapFragment.this)
-                        .navigate(R.id.action_MapFragment_to_MessagesFragment,bundle);
+                        .navigate(R.id.action_MapFragment_to_MessagesFragment, bundle);
             }
         });
+
         binding.buttonPhone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -93,7 +115,7 @@ public class MapFragment extends Fragment {
             }
         });
 
-        webView = binding.mapview;
+
 
         // Request phone permission when the app is opened
         requestPhonePermission();
@@ -111,16 +133,14 @@ public class MapFragment extends Fragment {
             loadMap();
         }
 
-        binding.buttonEmergency.setOnClickListener(new View.OnClickListener()
-        {
+        binding.buttonEmergency.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new SendEmergencyRequestTask().execute(username);
             }
         });
 
-        binding.buttonCancelEmergency.setOnClickListener(new View.OnClickListener()
-        {
+        binding.buttonCancelEmergency.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new SendCancelEmergencyRequestTask().execute(username);
@@ -128,9 +148,15 @@ public class MapFragment extends Fragment {
         });
 
         new GetAdminPhoneTask().execute();
-
     }
 
+    public void createMeetingWithAverageLocation(double latitude, double longitude) {
+        // Call JavaScript function from WebView
+        if(latitude!= 0 && longitude!= 0)
+        {String jsCode = "javascript:updateAverageLocation(" + latitude + ", " + longitude + ")";
+        webView.evaluateJavascript(jsCode, null);}
+
+    }
     // Phone ----------------------------------------------------------
     private void requestPhonePermission() {
         if (ActivityCompat.checkSelfPermission(requireActivity(),
@@ -407,6 +433,8 @@ public class MapFragment extends Fragment {
                 locations.addAll(fetchedLocations);
                 // Load the map with the updated locations
                 loadMapWithLocation(latitude, longitude, locations, username);
+
+                createMeetingWithAverageLocation(latitudeMeet, longitudeMeet);
                 // Check proximity to the fetched locations and play sound if necessary
                 checkProximityAndPlaySound(requireContext(), latitude, longitude, fetchedLocations);
             }
@@ -417,7 +445,7 @@ public class MapFragment extends Fragment {
     private void checkProximityAndPlaySound(Context context, double currentLatitude, double currentLongitude, List<LocationData> locations) {
         final float[] distance = new float[1];
         for (LocationData location : locations)
-            if(!location.username.equals( username))
+            if(!location.username.equals( username) && latitudeMeet!=0)
             {
                 Location.distanceBetween(currentLatitude, currentLongitude, location.getLatitude(), location.getLongitude(), distance);
                 if (distance[0] <= 50) { // If within 50 meters
@@ -606,12 +634,12 @@ public class MapFragment extends Fragment {
 //    }
 
     //meeting---------------------------------------------------------------
-    private void createMeetingWithAverageLocation() {
+    void createMeetingWithAverageLocation() {
         new CreateMeetingTask().execute();
     }
     // מראה נקודת אמצע בין כל המיקומים על המפה עם אייקון שונה
-    private class CreateMeetingTask extends AsyncTask<Void, Void, double[]> {
-        private static final String GET_MEETING_URL = BASE_URL + "/get-meeting/";
+    class CreateMeetingTask extends AsyncTask<Void, Void, double[]> {
+        private static final String GET_MEETING_URL = BASE_URL + "/get-meeting";
 
         @Override
         protected double[] doInBackground(Void... voids) {

@@ -61,6 +61,8 @@
             L.marker([location[0], location[1]], { icon: customIcon }).addTo(map)
                 .bindPopup(location[2]); // Show username
         });
+
+
     }
 
     function updateMapLocation(latitude, longitude, locations, username) {
@@ -91,9 +93,9 @@
         var marker = L.marker([latitude, longitude], { icon: emergencyMarker }).addTo(map);
     }
 
-    function updateAverageLocation(latitude, longitude) {
+    function updateAverageLocation(latitudeMeet, longitudeMeet) {
         if (map) {
-            var averageMarker = L.marker([latitude, longitude], { icon: averageLocationIcon }).addTo(map)
+            var averageMarker = L.marker([latitudeMeet, longitudeMeet], { icon: averageLocationIcon }).addTo(map)
                 .bindPopup("Average Location")
                 .openPopup();
         }
