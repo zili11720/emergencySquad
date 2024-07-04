@@ -149,7 +149,7 @@ public class ControlFragment extends Fragment {
 
 
     private void playVoiceAlert() {
-        MediaPlayer mediaPlayer = MediaPlayer.create(getContext(), R.raw.bird);
+        MediaPlayer mediaPlayer = MediaPlayer.create(getContext(), R.raw.emergancy);
         mediaPlayer.start();
     }
 
