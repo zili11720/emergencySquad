@@ -67,7 +67,7 @@ public class ControlFragment extends Fragment {
         binding.sendAlertButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new SendRequestTask().execute();
+                //  new SendRequestTask().execute();
             }
         });
 
@@ -142,13 +142,11 @@ public class ControlFragment extends Fragment {
         }
     }
 
-    }
 
     private void playVoiceAlert() {
         MediaPlayer mediaPlayer = MediaPlayer.create(getContext(), R.raw.bird);
         mediaPlayer.start();
     }
-
 
 
     private class CreateMeetingTask extends AsyncTask<Void, Void, double[]> {
@@ -207,3 +205,4 @@ public class ControlFragment extends Fragment {
         }
     }
 }
+
