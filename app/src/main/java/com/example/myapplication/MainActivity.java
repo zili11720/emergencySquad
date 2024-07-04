@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -22,8 +23,14 @@ import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.example.myapplication.databinding.ActivityMainBinding;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -74,6 +81,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         handler = new Handler(Looper.getMainLooper());
         noMovementRunnable = this::showAlertDialog;
         resetNoMovementTimer();
+
+        Intent serviceIntent = new Intent(this, CheckAlertService.class);
+        startService(serviceIntent);
+
     }
 
     private void showAlertDialog() {

@@ -25,7 +25,7 @@ public class ControlFragment extends Fragment {
 
     private FragmentControlBinding binding;
     private static final String TAG = "ControlFragment";
-    private static final String BASE_URL = "https://app.the-safe-zone.online";
+    public static final String BASE_URL = "https://app.the-safe-zone.online";
     private Handler handler;
     private Runnable checkAlertRunnable;
 
@@ -69,8 +69,7 @@ public class ControlFragment extends Fragment {
             @Override
             public void onClick(View v) {
                   new SendRequestTask().execute();
-                  new CheckAlertTask().execute();
-                  new SendFalseRequestTask().execute();
+                  //new SendFalseRequestTask().execute();
             }
         });
 
@@ -81,16 +80,16 @@ public class ControlFragment extends Fragment {
             }
         });
 
-        // התחלת הבדיקה המחזורית
-        handler = new Handler();
-        checkAlertRunnable = new Runnable() {
-            @Override
-            public void run() {
-                new CheckAlertTask().execute();
-                handler.postDelayed(this, 3000); // בדיקה כל 3 שניות
-            }
-        };
-        handler.post(checkAlertRunnable);
+//        // התחלת הבדיקה המחזורית
+//        handler = new Handler();
+//        checkAlertRunnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                new CheckAlertTask().execute();
+//                handler.postDelayed(this, 3000); // בדיקה כל 3 שניות
+//            }
+//        };
+//        handler.post(checkAlertRunnable);
     }
 
     @Override
@@ -98,59 +97,6 @@ public class ControlFragment extends Fragment {
         super.onDestroyView();
         binding = null;
         handler.removeCallbacks(checkAlertRunnable); // הפסקת הבדיקה המחזורית
-    }
-
-    private class CheckAlertTask extends AsyncTask<Void, Void, Boolean> {
-        private static final String CHECK_ALERT_URL = BASE_URL + "/act_get"; // כתובת ה-URL לבדיקה
-
-        @Override
-        protected Boolean doInBackground(Void... voids)
-        {
-            try {
-                URL url = new URL(CHECK_ALERT_URL);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-
-                int responseCode = conn.getResponseCode();
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    StringBuilder response = new StringBuilder();
-                    String inputLine;
-
-                    while ((inputLine = in.readLine()) != null) {
-                        response.append(inputLine);
-                    }
-                    in.close();
-
-                    JSONObject jsonResponse = new JSONObject(response.toString());
-                    boolean alertStatus = jsonResponse.getBoolean("act");
-                    Log.i("TTTT", "Got alertStatus: " + alertStatus);
-
-                    return alertStatus;
-
-                } else {
-                    Log.d(TAG, "Failed to check alert status. Response code: " + responseCode);
-                }
-                conn.disconnect();
-            } catch (Exception e) {
-                Log.e(TAG, "Error checking alert status", e);
-            }
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean alertStatus) {
-            if (alertStatus) {
-                playVoiceAlert();
-            }
-        }
-    }
-
-
-    private void playVoiceAlert() {
-        MediaPlayer mediaPlayer = MediaPlayer.create(getContext(), R.raw.emergancy);
-        mediaPlayer.start();
     }
 
 
@@ -214,38 +160,59 @@ public class ControlFragment extends Fragment {
     // AsyncTask to send the request to the server
     // AsyncTask to send the request to the server
     private static class SendRequestTask extends AsyncTask<Void, Void, Boolean> {
-        private static final String REQUEST_URL = BASE_URL + "/act_true/";
+        private static final String REQUEST_TRUE_URL = BASE_URL + "/act_true/";
+        private static final String REQUEST_FALSE_URL = BASE_URL + "/act_false/";
 
         @Override
         protected Boolean doInBackground(Void... voids) {
+            HttpURLConnection conn = null;
+            OutputStream os = null;
             try {
-                // Create URL object for the API endpoint
-                URL url = new URL(REQUEST_URL);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                URL url = new URL(REQUEST_TRUE_URL);
+                conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json; utf-8");
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setDoOutput(true);
 
-                // Create JSON object with the request data if needed
                 JSONObject jsonInput = new JSONObject();
-                // Add any parameters to the JSON object here if necessary
                 String jsonInputString = jsonInput.toString();
 
-                // Write JSON data to output stream
-                try (OutputStream os = conn.getOutputStream()) {
-                    byte[] input = jsonInputString.getBytes("utf-8");
-                    os.write(input, 0, input.length);
-                }
+                os = conn.getOutputStream();
+                byte[] input = jsonInputString.getBytes("utf-8");
+                os.write(input, 0, input.length);
 
-                // Get the response code from the server
                 int responseCode = conn.getResponseCode();
                 return responseCode == HttpURLConnection.HTTP_OK;
             } catch (Exception e) {
                 e.printStackTrace();
                 return false;
+            } finally {
+                if (os != null) {
+                    try {
+                        os.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (conn != null) {
+                    conn.disconnect();
+                }
             }
         }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            if (success) {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        new SendFalseRequestTask().execute();
+                    }
+                }, 30000); // 30000 milliseconds = 30 seconds
+            }
+        }
+    }
 
 //        @Override
 //        protected void onPostExecute(Boolean success) {
@@ -259,7 +226,7 @@ public class ControlFragment extends Fragment {
 //                }, 30000); // 30000 milliseconds = 30 seconds
 //            }
 //        }
-    }
+
 
     // AsyncTask to send the /act_false/ request to the server
     private static class SendFalseRequestTask extends AsyncTask<Void, Void, Boolean> {
