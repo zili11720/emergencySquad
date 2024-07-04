@@ -28,15 +28,15 @@
 <div id="map"></div>
 <script>
     var map;
-    var trueIcon = L.icon({
+    var falseIcon = L.icon({
         iconUrl: 'file:///android_asset/location-icon1.png',
         iconSize: [38, 40],
         iconAnchor: [22, 94],
         popupAnchor: [-3, -76]
     });
 
-    var falseIcon = L.icon({
-        iconUrl: 'file:///android_asset/location-icon2.png',
+    var trueIcon = L.icon({
+        iconUrl: 'file:///android_asset/icon-emergency.png',
         iconSize: [38, 40],
         iconAnchor: [22, 94],
         popupAnchor: [-3, -76]
@@ -50,9 +50,7 @@
             maxZoom: 22
         }).addTo(map);
 
-        L.marker([latitude, longitude], { icon: trueIcon }).addTo(map)
-            .bindPopup(username)
-            .openPopup();
+
 
         // Add multiple locations
         locations.forEach(function(location) {
@@ -61,6 +59,9 @@
                 .bindPopup(location[2]); // Show username
         });
     }
+
+
+
 
     function updateMapLocation(latitude, longitude, locations, username) {
         if (map) {
@@ -84,11 +85,6 @@
         } else {
             initMap(latitude, longitude, locations, username);
         }
-    }
-
-    function updateEmergencyLocation(latitude, longitude) {
-        var emergencyMarker = L.divIcon({ className: 'emergency-marker' });
-        var marker = L.marker([latitude, longitude], { icon: emergencyMarker }).addTo(map);
     }
 
     function updateAverageLocation(latitude, longitude) {

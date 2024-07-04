@@ -1,4 +1,3 @@
-
 package com.example.myapplication;
 
 import android.Manifest;
@@ -154,7 +153,7 @@ public class MapFragment extends Fragment {
         // Call JavaScript function from WebView
         if(latitude!= 0 && longitude!= 0)
         {String jsCode = "javascript:updateAverageLocation(" + latitude + ", " + longitude + ")";
-        webView.evaluateJavascript(jsCode, null);}
+            webView.evaluateJavascript(jsCode, null);}
 
     }
     // Phone ----------------------------------------------------------
@@ -245,11 +244,13 @@ public class MapFragment extends Fragment {
         private double latitude;
         private double longitude;
         private String username;
+        private boolean isInDanger;
 
-        public LocationData(double latitude, double longitude, String username) {
+        public LocationData(double latitude, double longitude, String username,boolean isInDanger) {
             this.latitude = latitude;
             this.longitude = longitude;
             this.username = username;
+            this.isInDanger = isInDanger;
         }
 
         public double getLatitude() {
@@ -262,6 +263,9 @@ public class MapFragment extends Fragment {
 
         public String getUsername() {
             return username;
+        }
+        public boolean getIsInDanger() {
+            return isInDanger;
         }
     }
     @SuppressLint("SetJavaScriptEnabled")
@@ -301,11 +305,13 @@ public class MapFragment extends Fragment {
                             longitude = location.getLongitude();
                             if (hasLocationChanged(latitude, longitude)) {
                                 Log.d(TAG, "Latitude: " + latitude + ", Longitude: " + longitude);
-                                // Fetch locations from the server instead of generating random ones
-                                fetchLocationsFromServer();
+
                                 // Send current location to the server
                                 sendLocationToServer(latitude, longitude, username);
+                                // Fetch locations from the server instead of generating random ones
+                                fetchLocationsFromServer();
                                 // Update last known location
+
                                 lastLatitude = latitude;
                                 lastLongitude = longitude;
                             }
@@ -332,7 +338,12 @@ public class MapFragment extends Fragment {
         StringBuilder json = new StringBuilder("[");
         for (int i = 0; i < locations.size(); i++) {
             LocationData loc = locations.get(i);
-            json.append("[").append(loc.getLatitude()).append(", ").append(loc.getLongitude()).append(", '").append(loc.getUsername()).append("']");
+            json.append("[")
+                    .append(loc.getLatitude()).append(", ")
+                    .append(loc.getLongitude()).append(", '")
+                    .append(loc.getUsername()).append("', ")
+                    .append(loc.getIsInDanger()) // Add isInDanger parameter
+                    .append("]");
             if (i < locations.size() - 1) {
                 json.append(", ");
             }
@@ -340,6 +351,7 @@ public class MapFragment extends Fragment {
         json.append("]");
         return json.toString();
     }
+
 
 
 
@@ -414,7 +426,8 @@ public class MapFragment extends Fragment {
                         double lat = jsonObject.getDouble("latitude");
                         double lon = jsonObject.getDouble("longitude");
                         String username = jsonObject.getString("username");
-                        locations.add(new LocationData(lat, lon, username));
+                        boolean isInDanger = jsonObject.getBoolean("isInDanger");
+                        locations.add(new LocationData(lat, lon, username,isInDanger));
                     }
 
                 } else {
