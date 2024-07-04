@@ -1,7 +1,9 @@
 package com.example.myapplication;
 
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +25,8 @@ public class ControlFragment extends Fragment {
     private FragmentControlBinding binding;
     private static final String TAG = "ControlFragment";
     private static final String BASE_URL = "https://app.the-safe-zone.online";
+    private Handler handler;
+    private Runnable checkAlertRunnable;
 
     @Override
     public View onCreateView(
@@ -44,6 +48,7 @@ public class ControlFragment extends Fragment {
         }
         new CreateMeetingTask(bundle);
 
+
         binding.btnMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -59,6 +64,12 @@ public class ControlFragment extends Fragment {
                         .navigate(R.id.action_ControlFragment_to_TeamFragment);
             }
         });
+        binding.sendAlertButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new SendRequestTask().execute();
+            }
+        });
 
         binding.setAMeeting.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,13 +77,79 @@ public class ControlFragment extends Fragment {
                 new CreateMeetingTask(bundle).execute();
             }
         });
+
+        // התחלת הבדיקה המחזורית
+        handler = new Handler();
+        checkAlertRunnable = new Runnable() {
+            @Override
+            public void run() {
+                new CheckAlertTask().execute();
+                handler.postDelayed(this, 3000); // בדיקה כל 3 שניות
+            }
+        };
+        handler.post(checkAlertRunnable);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+        handler.removeCallbacks(checkAlertRunnable); // הפסקת הבדיקה המחזורית
     }
+
+    private class CheckAlertTask extends AsyncTask<Void, Void, Boolean> {
+        private static final String CHECK_ALERT_URL = BASE_URL + "/act_get"; // כתובת ה-URL לבדיקה
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            try {
+                URL url = new URL(CHECK_ALERT_URL);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+
+                int responseCode = conn.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String inputLine;
+
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+
+                    JSONObject jsonResponse = new JSONObject(response.toString());
+                    boolean alertStatus = jsonResponse.getBoolean("alert");
+
+                    return alertStatus;
+
+                } else {
+                    Log.d(TAG, "Failed to check alert status. Response code: " + responseCode);
+                }
+                conn.disconnect();
+            } catch (Exception e) {
+                Log.e(TAG, "Error checking alert status", e);
+            }
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean alertStatus) {
+            if (alertStatus) {
+                playVoiceAlert();
+            }
+        }
+    }
+
+    }
+
+    private void playVoiceAlert() {
+        MediaPlayer mediaPlayer = MediaPlayer.create(getContext(), R.raw.bird);
+        mediaPlayer.start();
+    }
+
+
 
     private class CreateMeetingTask extends AsyncTask<Void, Void, double[]> {
         private static final String GET_MEETING_URL = BASE_URL + "/get-meeting";
