@@ -327,6 +327,7 @@ public class MapFragment extends Fragment {
     }
 
 
+
     private String locationsToJson(List<LocationData> locations) {
         StringBuilder json = new StringBuilder("[");
         for (int i = 0; i < locations.size(); i++) {
@@ -339,6 +340,7 @@ public class MapFragment extends Fragment {
         json.append("]");
         return json.toString();
     }
+
 
 
     private void sendLocationToServer(double latitude, double longitude, String username) {
@@ -440,6 +442,7 @@ public class MapFragment extends Fragment {
             }
         }
     }
+
 
     // Sound-------------------------------------------------------------------------------
     private void checkProximityAndPlaySound(Context context, double currentLatitude, double currentLongitude, List<LocationData> locations) {
