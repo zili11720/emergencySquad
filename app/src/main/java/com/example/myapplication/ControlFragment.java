@@ -124,8 +124,8 @@ public class ControlFragment extends Fragment {
                     in.close();
 
                     JSONObject jsonResponse = new JSONObject(response.toString());
-                    boolean alertStatus = jsonResponse.getBoolean("alert");
-                    Log.i("TTTT", "Got alertStatus: " + responseCode);
+                    boolean alertStatus = jsonResponse.getBoolean("act");
+                    Log.i("TTTT", "Got alertStatus: " + alertStatus);
 
                     return alertStatus;
 
