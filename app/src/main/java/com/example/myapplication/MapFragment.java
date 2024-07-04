@@ -10,6 +10,8 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,6 +54,11 @@ public class MapFragment extends Fragment {
     private double lastLongitude = Double.NaN;
     private double latitudeMeet;
     private double longitudeMeet;
+
+    private Handler handler = new Handler(Looper.getMainLooper());
+    private Runnable locationRunnable;
+    private Runnable mapRunnable;
+    private boolean isRunning = false;
 
     String username = "";
     String adminPhoneNumber="";
@@ -148,6 +155,55 @@ public class MapFragment extends Fragment {
 
         new GetAdminPhoneTask().execute();
     }
+
+    private void startLocationUpdates(final String username) {
+        isRunning = true;
+
+        locationRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (isRunning) {
+                    getLastLocation(username);
+                    handler.postDelayed(this, 5000); // 10 שניות
+                }
+            }
+        };
+
+        mapRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (isRunning) {
+                    // בדוק אם יש לך נתונים חדשים
+                    //if (latitude != lastLatitude && longitude != lastLongitude && locations != null) {
+                    loadMapWithLocation(latitude, longitude, locations, username);
+                }
+                handler.postDelayed(this, 5000); // 5 שניות
+            }
+
+        };
+
+        handler.post(locationRunnable);
+        handler.post(mapRunnable);
+    }
+
+    private void stopLocationUpdates() {
+        isRunning = false;
+        handler.removeCallbacks(locationRunnable);
+        handler.removeCallbacks(mapRunnable);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        startLocationUpdates(username); // החלף בשם המשתמש המתאים
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        stopLocationUpdates();
+    }
+
 
     public void createMeetingWithAverageLocation(double latitude, double longitude) {
         // Call JavaScript function from WebView
@@ -303,7 +359,7 @@ public class MapFragment extends Fragment {
                         if (location != null) {
                             latitude = location.getLatitude();
                             longitude = location.getLongitude();
-                            if (hasLocationChanged(latitude, longitude)) {
+                            //if (hasLocationChanged(latitude, longitude)) {
                                 Log.d(TAG, "Latitude: " + latitude + ", Longitude: " + longitude);
 
                                 // Send current location to the server
@@ -314,7 +370,7 @@ public class MapFragment extends Fragment {
 
                                 lastLatitude = latitude;
                                 lastLongitude = longitude;
-                            }
+                           // }
                         } else {
                             Log.d(TAG, "Location is null");
                         }
