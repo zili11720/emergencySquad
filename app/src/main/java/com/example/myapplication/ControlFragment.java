@@ -17,6 +17,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -67,7 +68,9 @@ public class ControlFragment extends Fragment {
         binding.sendAlertButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //  new SendRequestTask().execute();
+                  new SendRequestTask().execute();
+                  new CheckAlertTask().execute();
+                  new SendFalseRequestTask().execute();
             }
         });
 
@@ -101,7 +104,8 @@ public class ControlFragment extends Fragment {
         private static final String CHECK_ALERT_URL = BASE_URL + "/act_get"; // כתובת ה-URL לבדיקה
 
         @Override
-        protected Boolean doInBackground(Void... voids) {
+        protected Boolean doInBackground(Void... voids)
+        {
             try {
                 URL url = new URL(CHECK_ALERT_URL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -201,6 +205,96 @@ public class ControlFragment extends Fragment {
 
                 NavHostFragment.findNavController(ControlFragment.this)
                         .navigate(R.id.action_ControlFragment_to_MapFragment, bundle);
+            }
+        }
+    }
+
+
+    // AsyncTask to send the request to the server
+    // AsyncTask to send the request to the server
+    private static class SendRequestTask extends AsyncTask<Void, Void, Boolean> {
+        private static final String REQUEST_URL = BASE_URL + "/act_true/";
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            try {
+                // Create URL object for the API endpoint
+                URL url = new URL(REQUEST_URL);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json; utf-8");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setDoOutput(true);
+
+                // Create JSON object with the request data if needed
+                JSONObject jsonInput = new JSONObject();
+                // Add any parameters to the JSON object here if necessary
+                String jsonInputString = jsonInput.toString();
+
+                // Write JSON data to output stream
+                try (OutputStream os = conn.getOutputStream()) {
+                    byte[] input = jsonInputString.getBytes("utf-8");
+                    os.write(input, 0, input.length);
+                }
+
+                // Get the response code from the server
+                int responseCode = conn.getResponseCode();
+                return responseCode == HttpURLConnection.HTTP_OK;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+
+//        @Override
+//        protected void onPostExecute(Boolean success) {
+//            if (success) {
+//                // Schedule the second request after 30 seconds (30000 milliseconds)
+//                new Handler().postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        new SendFalseRequestTask().execute();
+//                    }
+//                }, 30000); // 30000 milliseconds = 30 seconds
+//            }
+//        }
+    }
+
+    // AsyncTask to send the /act_false/ request to the server
+    private static class SendFalseRequestTask extends AsyncTask<Void, Void, Boolean> {
+        private static final String REQUEST_FALSE_URL = BASE_URL + "/act_false/";
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            try {
+                // Create URL object for the API endpoint
+                URL url = new URL(REQUEST_FALSE_URL);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json; utf-8");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setDoOutput(true);
+
+                // Create JSON object with the request data if needed
+                JSONObject jsonInput = new JSONObject();
+                // Add any parameters to the JSON object here if necessary
+                String jsonInputString = jsonInput.toString();
+
+                // Write JSON data to output stream
+                try (OutputStream os = conn.getOutputStream())
+                {
+                    byte[] input = jsonInputString.getBytes("utf-8");
+                    os.write(input, 0, input.length);
+                }
+
+                // Get the response code from the server
+                int responseCode = conn.getResponseCode();
+                return responseCode == HttpURLConnection.HTTP_OK;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return false;
             }
         }
     }
