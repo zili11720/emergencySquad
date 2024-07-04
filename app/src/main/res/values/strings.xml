@@ -17,7 +17,7 @@
     <string name="emergency_button">Emergency</string>
     <string name="call_control">Call control</string>
     <string name="watch_messages">Watch messages</string>
-    <string name="cancel_emergency">cancel emergency</string>
+    <string name="cancel_emergency">cancel</string>
     <string name="send_alert"> Send Alert</string>
 
     #texts
