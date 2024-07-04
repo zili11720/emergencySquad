@@ -35,6 +35,8 @@
         <activity
             android:name=".MessagesFragment"
             android:exported="false" />
+        <service
+            android:name=".CheckAlertService" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
