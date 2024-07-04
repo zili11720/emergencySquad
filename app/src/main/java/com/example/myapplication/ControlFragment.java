@@ -68,9 +68,9 @@ public class ControlFragment extends Fragment {
         binding.sendAlertButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                  new SendRequestTask().execute();
-//                  new CheckAlertTask().execute();
-//                  new SendFalseRequestTask().execute();
+                  new SendRequestTask().execute();
+                  new CheckAlertTask().execute();
+                  new SendFalseRequestTask().execute();
             }
         });
 
@@ -125,6 +125,7 @@ public class ControlFragment extends Fragment {
 
                     JSONObject jsonResponse = new JSONObject(response.toString());
                     boolean alertStatus = jsonResponse.getBoolean("alert");
+                    Log.i("TTTT", "Got alertStatus: " + responseCode);
 
                     return alertStatus;
 
