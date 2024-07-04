@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +33,9 @@ public class MessagesFragment extends Fragment {
     private ArrayList<String> messages;
     private ArrayAdapter<String> adapter;
     private static final String BASE_URL = "https://app.the-safe-zone.online";
+    private Handler handler;
+    private Runnable updateMessagesRunnable;
+    private static final int UPDATE_INTERVAL = 3000; // 3 seconds
 
     public MessagesFragment() {
         // Required empty public constructor
@@ -60,6 +64,18 @@ public class MessagesFragment extends Fragment {
         messages = new ArrayList<>();
         adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, messages);
         listViewMessages.setAdapter(adapter);
+
+        // Initialize handler and runnable
+        handler = new Handler();
+        updateMessagesRunnable = new Runnable() {
+            @Override
+            public void run() {
+                // Fetch messages
+                fetchMessages();
+                // Schedule the runnable to run again after the interval
+                handler.postDelayed(this, UPDATE_INTERVAL);
+            }
+        };
 
         // Set up the button click listener
         btnSendMessage.setOnClickListener(new View.OnClickListener() {
@@ -93,8 +109,16 @@ public class MessagesFragment extends Fragment {
         super.onResume();
         // Fetch messages when the fragment is resumed
         fetchMessages();
+        // Start the periodic update of messages
+        handler.postDelayed(updateMessagesRunnable, UPDATE_INTERVAL);
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Stop the periodic update of messages
+        handler.removeCallbacks(updateMessagesRunnable);
+    }
 
     // Function to get the current timestamp in the desired format
     private String getCurrentTimestamp() {
