@@ -68,9 +68,9 @@ public class ControlFragment extends Fragment {
         binding.sendAlertButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                  new SendRequestTask().execute();
-                  new CheckAlertTask().execute();
-                  new SendFalseRequestTask().execute();
+//                  new SendRequestTask().execute();
+//                  new CheckAlertTask().execute();
+//                  new SendFalseRequestTask().execute();
             }
         });
 
