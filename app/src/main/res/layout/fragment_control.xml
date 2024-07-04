@@ -44,13 +44,12 @@
         android:text="@string/set_a_meeting" />
 
     <Button
-        android:id="@+id/sendAlertButton"
+        android:id="@+id/send_alert_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:backgroundTint="@color/dark_green"
-        android:text="@string/send_alert"
-        />
+        android:text="send_alert" />
 
 
 </LinearLayout>
