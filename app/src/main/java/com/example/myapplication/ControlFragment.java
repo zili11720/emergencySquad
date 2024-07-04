@@ -69,7 +69,7 @@ public class ControlFragment extends Fragment {
             @Override
             public void onClick(View v) {
                   new SendRequestTask().execute();
-                  //new SendFalseRequestTask().execute();
+                // new SendFalseRequestTask().execute();
             }
         });
 
@@ -174,7 +174,6 @@ public class ControlFragment extends Fragment {
                 conn.setRequestProperty("Content-Type", "application/json; utf-8");
                 conn.setRequestProperty("Accept", "application/json");
                 conn.setDoOutput(true);
-
                 JSONObject jsonInput = new JSONObject();
                 String jsonInputString = jsonInput.toString();
 
@@ -184,7 +183,8 @@ public class ControlFragment extends Fragment {
 
                 int responseCode = conn.getResponseCode();
                 return responseCode == HttpURLConnection.HTTP_OK;
-            } catch (Exception e) {
+            } catch (Exception e)
+            {
                 e.printStackTrace();
                 return false;
             } finally {
@@ -209,7 +209,7 @@ public class ControlFragment extends Fragment {
                     public void run() {
                         new SendFalseRequestTask().execute();
                     }
-                }, 30000); // 30000 milliseconds = 30 seconds
+                }, 5000); // 5000 milliseconds = 5 seconds
             }
         }
     }
