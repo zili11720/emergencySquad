@@ -1,7 +1,6 @@
 package com.example.myapplication;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -14,7 +13,6 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,9 +22,6 @@ import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import androidx.biometric.BiometricManager;
-import androidx.biometric.BiometricPrompt;
-import androidx.core.content.ContextCompat;
 
 import com.example.myapplication.databinding.ActivityMainBinding;
 
@@ -84,14 +79,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private void showAlertDialog() {
         if (!isAlertShown) {
             Log.d(TAG, "Showing alert dialog");
-            new AlertDialog.Builder(this)
-                    .setTitle("Alert")
-                    .setMessage("The device has not moved for 3 minuteד.")
-                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                        isAlertShown = false;
-                        resetNoMovementTimer(); // Reset the timer after the alert is dismissed
-                    })
-                    .show();
+//            new AlertDialog.Builder(this)
+//                    .setTitle("Alert")
+//                    .setMessage("The device has not moved for 3 minuteד.")
+//                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+//                        isAlertShown = false;
+//                        resetNoMovementTimer(); // Reset the timer after the alert is dismissed
+//                    })
+                   // .show();
             isAlertShown = true;
         }
     }
