@@ -72,9 +72,6 @@
                 }
             });
 
-            L.marker([latitude, longitude], { icon: trueIcon }).addTo(map)
-                .bindPopup(username)
-                .openPopup();
 
             // Update markers for multiple locations
             locations.forEach(function(location) {
