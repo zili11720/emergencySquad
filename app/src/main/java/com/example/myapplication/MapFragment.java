@@ -54,6 +54,7 @@ public class MapFragment extends Fragment {
     private double lastLongitude = Double.NaN;
     private double latitudeMeet;
     private double longitudeMeet;
+    private boolean isInDanger;
 
     private Handler handler = new Handler(Looper.getMainLooper());
     private Runnable locationRunnable;
@@ -175,7 +176,7 @@ public class MapFragment extends Fragment {
                 if (isRunning) {
                     // בדוק אם יש לך נתונים חדשים
                     //if (latitude != lastLatitude && longitude != lastLongitude && locations != null) {
-                    loadMapWithLocation(latitude, longitude, locations, username);
+                    loadMapWithLocation(latitude, longitude, locations, username,isInDanger);
                 }
                 handler.postDelayed(this, 5000); // 5 שניות
             }
@@ -302,7 +303,7 @@ public class MapFragment extends Fragment {
         private String username;
         private boolean isInDanger;
 
-        public LocationData(double latitude, double longitude, String username,boolean isInDanger) {
+        public LocationData(double latitude, double longitude, String username, boolean isInDanger) {
             this.latitude = latitude;
             this.longitude = longitude;
             this.username = username;
@@ -363,7 +364,7 @@ public class MapFragment extends Fragment {
                                 Log.d(TAG, "Latitude: " + latitude + ", Longitude: " + longitude);
 
                                 // Send current location to the server
-                                sendLocationToServer(latitude, longitude, username);
+                                sendLocationToServer(latitude, longitude, username,isInDanger);
                                 // Fetch locations from the server instead of generating random ones
                                 fetchLocationsFromServer();
                                 // Update last known location
@@ -383,8 +384,8 @@ public class MapFragment extends Fragment {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private void loadMapWithLocation(double latitude, double longitude, List<LocationData> locations, String username) {
-        String jsCode = "javascript:updateMapLocation(" + latitude + ", " + longitude + ", " + locationsToJson(locations) + ", '" + username + "')";
+    private void loadMapWithLocation(double latitude, double longitude, List<LocationData> locations, String username,boolean isInDanger) {
+        String jsCode = "javascript:updateMapLocation(" + latitude + ", " + longitude + ", " + locationsToJson(locations) + ", '" + username +"', "+isInDanger+ ")";
         webView.evaluateJavascript(jsCode, null);
     }
 
@@ -411,8 +412,8 @@ public class MapFragment extends Fragment {
 
 
 
-    private void sendLocationToServer(double latitude, double longitude, String username) {
-        new SendLocationTask().execute(latitude, longitude, username);
+    private void sendLocationToServer(double latitude, double longitude, String username,boolean isInDanger) {
+        new SendLocationTask().execute(latitude, longitude, username,isInDanger);
     }
 
     private class SendLocationTask extends AsyncTask<Object, Void, Void> {
@@ -421,6 +422,7 @@ public class MapFragment extends Fragment {
             double latitude = (double) params[0];
             double longitude = (double) params[1];
             String username = (String) params[2];
+            boolean isInDanger=(boolean) params[3];
             try {
                 URL url = new URL("https://app.the-safe-zone.online/add_location/");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -432,6 +434,7 @@ public class MapFragment extends Fragment {
                 jsonParam.put("latitude", latitude);
                 jsonParam.put("longitude", longitude);
                 jsonParam.put("username", username);
+                jsonParam.put("isInDanger", isInDanger);
 
                 OutputStream os = conn.getOutputStream();
                 os.write(jsonParam.toString().getBytes("UTF-8"));
@@ -484,6 +487,7 @@ public class MapFragment extends Fragment {
                         String username = jsonObject.getString("username");
                         boolean isInDanger = jsonObject.getBoolean("isInDanger");
                         locations.add(new LocationData(lat, lon, username,isInDanger));
+                        //locations.add(new LocationData(lat, lon, username));
                     }
 
                 } else {
@@ -503,7 +507,7 @@ public class MapFragment extends Fragment {
                 locations.clear();
                 locations.addAll(fetchedLocations);
                 // Load the map with the updated locations
-                loadMapWithLocation(latitude, longitude, locations, username);
+                loadMapWithLocation(latitude, longitude, locations, username,isInDanger);
 
                 createMeetingWithAverageLocation(latitudeMeet, longitudeMeet);
                 // Check proximity to the fetched locations and play sound if necessary
@@ -546,6 +550,7 @@ public class MapFragment extends Fragment {
 
         @Override
         protected String doInBackground(String... params) {
+            isInDanger=false;
             String response = "";
             HttpURLConnection urlConnection = null;
             try {
@@ -594,6 +599,7 @@ public class MapFragment extends Fragment {
 
         @Override
         protected String doInBackground(String... params) {
+            isInDanger=true;
             String response = "";
             HttpURLConnection urlConnection = null;
             try {
@@ -752,7 +758,7 @@ public class MapFragment extends Fragment {
             if (averageLocation != null) {
                 Log.d(TAG, "Average location: Latitude " + averageLocation[0] + ", Longitude " + averageLocation[1]);
                 // Update the map with the average location and add special icon
-                loadMapWithLocation(averageLocation[0], averageLocation[1], locations, username);
+                loadMapWithLocation(averageLocation[0], averageLocation[1], locations, username,isInDanger);
                 updateAverageLocationOnMap(averageLocation[0], averageLocation[1]);
             } else {
                 Log.d(TAG, "Failed to get average location from server");
