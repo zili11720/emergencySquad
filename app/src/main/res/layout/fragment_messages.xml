@@ -2,15 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/khaki">
 
   <ListView
       android:id="@+id/listViewMessages"
       android:layout_width="match_parent"
       android:layout_height="0dp"
       android:layout_weight="1"
-      android:background="@color/khaki"/>
+      android:background="@color/khaki"
+      />
 
+  <!--
   <LinearLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
@@ -31,4 +34,43 @@
         android:textColor="@android:color/white"
         android:textColorHint="@color/hunter_green"/>
   </LinearLayout>
+  -->
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      android:gravity="center">
+
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="מחבל"
+        android:backgroundTint="@color/khaki"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="פרצה"
+        android:backgroundTint="@color/khaki"
+        android:textColor="@color/black"
+        android:textSize="18sp"/>
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="דריסה"
+        android:backgroundTint="@color/khaki"
+        android:textColor="@color/black"
+        android:textSize="18sp"/>
+  </LinearLayout>
 </LinearLayout>
+

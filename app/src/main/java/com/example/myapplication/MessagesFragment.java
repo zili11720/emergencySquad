@@ -30,11 +30,12 @@ public class MessagesFragment extends Fragment {
     private ListView listViewMessages;
     private EditText editTextMessage;
     private Button btnSendMessage;
-    private ArrayList<String> messages;
-    private ArrayAdapter<String> adapter;
+    private ArrayList<Message> messages;
+    //private ArrayAdapter<String> adapter;
     private static final String BASE_URL = "https://app.the-safe-zone.online";
     private Handler handler;
     private Runnable updateMessagesRunnable;
+    private MessageAdapter adapter;
     private static final int UPDATE_INTERVAL = 3000; // 3 seconds
 
     public MessagesFragment() {
@@ -57,13 +58,63 @@ public class MessagesFragment extends Fragment {
 
         // Initialize views
         listViewMessages = view.findViewById(R.id.listViewMessages);
-        editTextMessage = view.findViewById(R.id.editTextMessage);
-        btnSendMessage = view.findViewById(R.id.btnSendMessage);
+        Button button1 = view.findViewById(R.id.button1);
+        Button button2 = view.findViewById(R.id.button2);
+        Button button3 = view.findViewById(R.id.button3);
+//       // editTextMessage = view.findViewById(R.id.editTextMessage);
+//       //  btnSendMessage = view.findViewById(R.id.btnSendMessage);
 
         // Initialize message list and adapter
         messages = new ArrayList<>();
-        adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, messages);
+        adapter = new MessageAdapter(requireContext(),  messages);
         listViewMessages.setAdapter(adapter);
+
+
+        // Set up button click listeners
+        button1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendMessage("חדירת מחבלים");
+            }
+        });
+
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendMessage("פרצה בגדר");
+            }
+        });
+
+        button3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendMessage("דריסה");
+            }
+
+
+//        btnSendMessage.setOnClickListener(new View.OnClickListener()
+//        {
+//            @Override
+//            public void onClick(View v)
+//            {
+//                String message = editTextMessage.getText().toString();
+//                String userName = username;
+//                String timestamp = getCurrentTimestamp();
+//
+//                if (!message.isEmpty())
+//                {
+//                    messages.add(new Message(userName, timestamp, message));
+//
+//                    adapter.notifyDataSetChanged();
+//
+//                    new SendMessageTask().execute(message, userName, timestamp);
+//
+//                    editTextMessage.setText("");
+//                }
+//            }
+
+
+        });
 
         // Initialize handler and runnable
         handler = new Handler();
@@ -77,32 +128,44 @@ public class MessagesFragment extends Fragment {
             }
         };
 
-        // Set up the button click listener
-        btnSendMessage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Get the message text, user name, and current timestamp
-                String message = editTextMessage.getText().toString();
-                String userName = username;//get the username
-                String timestamp = getCurrentTimestamp(); // Function to get the current timestamp
-
-                // Check if the message is not empty
-                if (!message.isEmpty()) {
-                    // Add the message to the list with username and update the adapter
-                    messages.add(userName + ": " + timestamp + "                                                                " + message);
-                    adapter.notifyDataSetChanged();
-
-                    // Execute the task to send the message to the server
-                    new SendMessageTask().execute(message, userName, timestamp);
-
-                    // Clear the input field
-                    editTextMessage.setText("");
-                }
-            }
-        });
+//        // Set up the button click listener
+//        btnSendMessage.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                // Get the message text, user name, and current timestamp
+//                String message = editTextMessage.getText().toString();
+//                String userName = username;
+//                String timestamp = getCurrentTimestamp();
+//                // Check if the message is not empty
+//                if (!message.isEmpty()) {
+//                    // Add the message to the list with username and update the adapter
+//                    messages.add(new Message(userName, timestamp, message));
+//                    adapter.notifyDataSetChanged();
+//
+//                    // Execute the task to send the message to the server
+//                    new SendMessageTask().execute(message, userName, timestamp);
+//
+//                    // Clear the input field
+//                    editTextMessage.setText("");
+//                }
+//            }
+//        });
 
         return view;
     }
+
+
+    private void sendMessage(String message) {
+        String userName = username;
+        String timestamp = getCurrentTimestamp();
+
+        if (!message.isEmpty()) {
+            messages.add(new Message(userName, timestamp, message));
+            adapter.notifyDataSetChanged();
+            new SendMessageTask().execute(message, userName, timestamp);
+        }
+    }
+
 
     @Override
     public void onResume() {
@@ -111,6 +174,8 @@ public class MessagesFragment extends Fragment {
         fetchMessages();
         // Start the periodic update of messages
         handler.postDelayed(updateMessagesRunnable, UPDATE_INTERVAL);
+
+        handler.post(updateMessagesRunnable); // Start fetching messages
     }
 
     @Override
@@ -133,14 +198,15 @@ public class MessagesFragment extends Fragment {
     }
 
     // Function to update the messages in the ListView
-    public void updateMessages(ArrayList<String> newMessages) {
+    public void updateMessages(ArrayList<Message> newMessages) {
         messages.clear();
         messages.addAll(newMessages);
         adapter.notifyDataSetChanged();
     }
 
+
     // AsyncTask to fetch messages from the server
-    private static class FetchMessagesTask extends AsyncTask<Void, Void, ArrayList<String>> {
+    private static class FetchMessagesTask extends AsyncTask<Void, Void, ArrayList<Message>> {
         private static final String FETCH_MESSAGES_URL = BASE_URL + "/read_messages/";
         private MessagesFragment fragment;
 
@@ -149,8 +215,8 @@ public class MessagesFragment extends Fragment {
         }
 
         @Override
-        protected ArrayList<String> doInBackground(Void... voids) {
-            ArrayList<String> messageList = new ArrayList<>();
+        protected ArrayList<Message> doInBackground(Void... voids) {
+            ArrayList<Message> messageList = new ArrayList<>();
             try {
                 URL url = new URL(FETCH_MESSAGES_URL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -172,8 +238,9 @@ public class MessagesFragment extends Fragment {
                     String messageContent = jsonObject.getString("content");
                     String sender = jsonObject.getString("send");
                     String timestamp = jsonObject.getString("time");
-                    messageList.add(sender + ": " + timestamp + "                                                  " + messageContent);
+                    messageList.add((new Message(sender, timestamp, messageContent)));
                 }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -181,7 +248,7 @@ public class MessagesFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(ArrayList<String> messages) {
+        protected void onPostExecute(ArrayList<Message> messages) {
             fragment.updateMessages(messages);
         }
     }

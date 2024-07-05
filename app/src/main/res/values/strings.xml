@@ -20,6 +20,7 @@
     <string name="cancel_emergency">cancel</string>
     <string name="send_alert"> Send Alert</string>
 
+
     #texts
     <string name="welcome_to_control_screen">Welcome to control screen</string>
     <string name="password_text">Password</string>
