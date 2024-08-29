@@ -74,23 +74,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         handler = new Handler(Looper.getMainLooper());
         noMovementRunnable = this::showAlertDialog;
         resetNoMovementTimer();
-
-//        Intent serviceIntent = new Intent(this, CheckAlertService.class);
-//        startService(serviceIntent);
-
     }
 
     private void showAlertDialog() {
         if (!isAlertShown) {
             Log.d(TAG, "Showing alert dialog");
-//            new AlertDialog.Builder(this)
-//                    .setTitle("Alert")
-//                    .setMessage("The device has not moved for 3 minuteד.")
-//                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-//                        isAlertShown = false;
-//                        resetNoMovementTimer(); // Reset the timer after the alert is dismissed
-//                    })
-//                    .show();
             isAlertShown = true;
         }
     }

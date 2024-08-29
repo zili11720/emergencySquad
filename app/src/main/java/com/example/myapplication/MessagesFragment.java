@@ -29,10 +29,7 @@ public class MessagesFragment extends Fragment {
 
     // Views and data for displaying messages
     private ListView listViewMessages;
-    private EditText editTextMessage;
-    private Button btnSendMessage;
     private ArrayList<Message> messages;
-    //private ArrayAdapter<String> adapter;
     private static final String BASE_URL = "https://app.the-safe-zone.online";
     private Handler handler;
     private Runnable updateMessagesRunnable;
@@ -62,8 +59,6 @@ public class MessagesFragment extends Fragment {
         Button button1 = view.findViewById(R.id.button1);
         Button button2 = view.findViewById(R.id.button2);
         Button button3 = view.findViewById(R.id.button3);
-//       // editTextMessage = view.findViewById(R.id.editTextMessage);
-//       //  btnSendMessage = view.findViewById(R.id.btnSendMessage);
 
         // Initialize message list and adapter
         messages = new ArrayList<>();
@@ -92,29 +87,6 @@ public class MessagesFragment extends Fragment {
                 sendMessage("חברתי אליה, המצב בשליטה");
             }
 
-
-//        btnSendMessage.setOnClickListener(new View.OnClickListener()
-//        {
-//            @Override
-//            public void onClick(View v)
-//            {
-//                String message = editTextMessage.getText().toString();
-//                String userName = username;
-//                String timestamp = getCurrentTimestamp();
-//
-//                if (!message.isEmpty())
-//                {
-//                    messages.add(new Message(userName, timestamp, message));
-//
-//                    adapter.notifyDataSetChanged();
-//
-//                    new SendMessageTask().execute(message, userName, timestamp);
-//
-//                    editTextMessage.setText("");
-//                }
-//            }
-
-
         });
 
         // Initialize handler and runnable
@@ -128,29 +100,6 @@ public class MessagesFragment extends Fragment {
                 handler.postDelayed(this, UPDATE_INTERVAL);
             }
         };
-
-//        // Set up the button click listener
-//        btnSendMessage.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                // Get the message text, user name, and current timestamp
-//                String message = editTextMessage.getText().toString();
-//                String userName = username;
-//                String timestamp = getCurrentTimestamp();
-//                // Check if the message is not empty
-//                if (!message.isEmpty()) {
-//                    // Add the message to the list with username and update the adapter
-//                    messages.add(new Message(userName, timestamp, message));
-//                    adapter.notifyDataSetChanged();
-//
-//                    // Execute the task to send the message to the server
-//                    new SendMessageTask().execute(message, userName, timestamp);
-//
-//                    // Clear the input field
-//                    editTextMessage.setText("");
-//                }
-//            }
-//        });
 
         return view;
     }

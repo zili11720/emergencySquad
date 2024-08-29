@@ -35,7 +35,6 @@ public class NewTeamFragment extends Fragment {
             public void onClick(View v) {
                 NavHostFragment.findNavController(NewTeamFragment.this)
                         .navigate(R.id.action_NewTeamFragment_to_NewMemberFragment);
-                //לסמן כמנהל
             }
         });
 
@@ -44,7 +43,6 @@ public class NewTeamFragment extends Fragment {
             public void onClick(View v) {
                 groupNumber = groupNumberInput.getText().toString();
                 // Handle the button click, groupNumber variable contains the entered group number
-                //להוסיף לכל אחד שדה עם המספר קבוצה.....
             }
         });
 
