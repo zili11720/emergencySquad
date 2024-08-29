@@ -2,7 +2,6 @@ package com.example.myapplication;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -76,8 +75,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         noMovementRunnable = this::showAlertDialog;
         resetNoMovementTimer();
 
-        Intent serviceIntent = new Intent(this, CheckAlertService.class);
-        startService(serviceIntent);
+//        Intent serviceIntent = new Intent(this, CheckAlertService.class);
+//        startService(serviceIntent);
 
     }
 
@@ -91,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 //                        isAlertShown = false;
 //                        resetNoMovementTimer(); // Reset the timer after the alert is dismissed
 //                    })
-                   // .show();
+//                    .show();
             isAlertShown = true;
         }
     }

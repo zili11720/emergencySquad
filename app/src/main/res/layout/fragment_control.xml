@@ -43,14 +43,7 @@
         android:backgroundTint="@color/dark_green"
         android:text="@string/set_a_meeting" />
 
-    <Button
-        android:id="@+id/send_alert_button"
-        android:layout_width="145dp"
-        android:layout_height="150dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="100dp"
-        android:backgroundTint="@color/dark_green"
-        android:text="send_alert" />
+
 
 
 </LinearLayout>

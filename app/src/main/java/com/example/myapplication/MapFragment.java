@@ -165,7 +165,7 @@ public class MapFragment extends Fragment {
             public void run() {
                 if (isRunning) {
                     getLastLocation(username);
-                    handler.postDelayed(this, 5000); // 10 שניות
+                    handler.postDelayed(this, 7000); // 10 שניות
                 }
             }
         };
@@ -178,7 +178,7 @@ public class MapFragment extends Fragment {
                     //if (latitude != lastLatitude && longitude != lastLongitude && locations != null) {
                     loadMapWithLocation(latitude, longitude, locations, username,isInDanger);
                 }
-                handler.postDelayed(this, 5000); // 5 שניות
+                handler.postDelayed(this, 7000); // 5 שניות
             }
 
         };
@@ -524,7 +524,7 @@ public class MapFragment extends Fragment {
             if(!location.username.equals( username))
             {
                 Location.distanceBetween(currentLatitude, currentLongitude, location.getLatitude(), location.getLongitude(), distance);
-                if (distance[0] <= 50) { // If within 50 meters
+                if (distance[0] <= 10) { // If within 50 meters
                     playSound(context);
                     break; // Play sound once if any location is within 50 meters
                 }
